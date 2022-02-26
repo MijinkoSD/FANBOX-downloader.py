@@ -6,7 +6,6 @@ import json
 import argparse
 import datetime
 import re
-from unicodedata import category
 
 import requests
 import urllib.parse
@@ -69,6 +68,8 @@ class Post:
 
     def download(self, page_limit:int|None = None) -> None:
         "投稿データのダウンロードから保存までを全部自動でやってくれるありがたい関数。"
+        data = self.get_creator_get()
+        self.save_post(data, filename="%s_profile_%d.json")
         data = self.download_posts(self.get_paginateCreator(),limit=page_limit)
         self.save_post(data)
 
@@ -83,6 +84,12 @@ class Post:
         """post.listCreatorを叩いてページの詳細情報を取得する。"""
         url = BASE_URL+"post.listCreator"
         payload = kwargs
+        return self.__download_json(url, params=payload)
+    
+    def get_creator_get(self) -> dict:
+        """creator.getを叩いてクリエイターのFANBOX上のプロフィールなどを取得する。"""
+        url = BASE_URL+"creator.get"
+        payload = {"creatorId": self.creator_id}
         return self.__download_json(url, params=payload)
 
     def __query_parse(self, url:str) -> dict[AnyStr]:
@@ -113,9 +120,18 @@ class Post:
             sleep(WAIT_TIME)
         return posts
 
-    def save_post(self, data:list) -> None:
-        """ダウンロードした投稿データをローカルに保存します。"""
-        filedir = os.path.join(BASE_LOCAL_DIR, "%s_%d.json" % (self.creator_id, time_now()))
+    def save_post(self, data:list, filename="%s_%d.json") -> None:
+        """
+        ダウンロードした投稿データをローカルに保存します。
+        
+        Params
+        -------
+        data:
+            保存するデータ。
+        filename:
+            保存するときのファイル名。
+        """
+        filedir = os.path.join(BASE_LOCAL_DIR, filename % (self.creator_id, time_now()))
         save_json(data, filedir)
 
 class File:

@@ -289,5 +289,5 @@ class File:
             os.makedirs(os.path.join(BASE_LOCAL_DIR, self.creator_id, postid), exist_ok=True)
             count = save(t["image"], postid=postid, filetype="images", count=count)
             count = save(t["cover"], postid=postid, filetype="cover", count=count)
-            count = save(t["thumb"], postid=postid, filetype="thumbnail", count=count)
+            count = save(t["thumb"], postid=postid, filetype="thumbnails", count=count)
             count = save(t["file"], postid=postid, filetype="files", count=count)

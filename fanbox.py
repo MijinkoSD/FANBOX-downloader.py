@@ -71,7 +71,8 @@ class Post:
         "投稿データのダウンロードから保存までを全部自動でやってくれるありがたい関数。"
         data = self.get_creator_get()
         self.save_post(data, filename="%s_profile_%d.json")
-        if page_limit <= 0: return
+        if page_limit is int:
+            if page_limit == 0: return
         data = self.download_posts(self.get_paginateCreator(),limit=page_limit)
         self.save_post(data)
 

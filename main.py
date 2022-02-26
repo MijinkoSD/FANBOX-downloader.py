@@ -31,13 +31,14 @@ else:
 if args.page_limit is None:
     limit = None
 else:
-    limit = args.page_limit
+    limit = args.page_limit if args.page_limit >= 0 else 0
 
 for cid in args.creator_id:
     fb = fanbox.Post(creator_id=cid, args=args, FANBOXSESSID=sessid, log_to_stdout=True)
     fb.download(page_limit=limit)
     sessid = fb.sessid
-    if limit <= 0: continue
+    if limit is int:
+        if limit == 0: continue
     fb = fanbox.File(creator_id=cid, args=args, FANBOXSESSID=sessid, log_to_stdout=True)
     fb.download()
     sessid = fb.sessid

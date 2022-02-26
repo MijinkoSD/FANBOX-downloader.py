@@ -377,6 +377,7 @@ class File:
         urls = self.__extract_file_url(data=postdata)
         max_count = self.__get_urls_len(urls)
         for postid, t in urls.items():
+            if self.__get_urls_len(t) == 0: continue
             os.makedirs(os.path.join(BASE_LOCAL_DIR, self.creator_id, postid), exist_ok=True)
             count = save(t["image"], postid=postid, filetype="images", count=count)
             count = save(t["cover"], postid=postid, filetype="cover", count=count)

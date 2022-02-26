@@ -1,1 +1,4 @@
 test.py
+posts/
+__pycache__
+*.json

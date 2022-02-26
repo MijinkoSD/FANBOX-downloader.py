@@ -6,9 +6,9 @@ import json
 import argparse
 import datetime
 import re
+import urllib.parse
 
 import requests
-import urllib.parse
 
 
 BASE_URL = "https://api.fanbox.cc/"
@@ -308,11 +308,6 @@ class File:
             count += 1
         return count
 
-        for i in urls.values():
-            for k in i:
-                count += len(i[k])
-        return count
-
     def download_files(self, postdata:dict) -> None:
         """投稿データから添付ファイルや画像等をダウンロードします。"""
         def save(urls:list[str], postid:str, filetype:str, count:int) -> int:
@@ -322,6 +317,10 @@ class File:
             os.makedirs(dir, exist_ok=True)
             for url in urls:
                 count += 1
+                if (os.path.isfile(os.path.join(dir, os.path.basename(url)))
+                        and not self.args.force_update):
+                    self.__log("ファイルのダウンロードをスキップ(%d/%d件)" % (count, max_count))
+                    continue
                 self.__log("ファイルをダウンロード中...(%d/%d件)" % (count, max_count))
                 try:
                     r = self.session.get(url, timeout=(6.0, 12.0))
@@ -365,6 +364,10 @@ class File:
             os.makedirs(dir, exist_ok=True)
             for url in urls:
                 count += 1
+                if (os.path.isfile(os.path.join(dir, os.path.basename(url)))
+                        and not self.args.force_update):
+                    self.__log("プロフィール画像のダウンロードをスキップ(%d/%d件)" % (count, max_count))
+                    continue
                 self.__log("プロフィール画像をダウンロード中...(%d/%d件)" % (count, max_count))
                 try:
                     r = self.session.get(url, timeout=(6.0, 12.0))

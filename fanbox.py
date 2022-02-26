@@ -17,6 +17,7 @@ BASE_LOCAL_DIR = "./posts/"
 
 def save_json(data:Any, dir:str):
     """変数の中身をjsonファイルに保存します。"""
+    os.makedirs(os.path.dirname(dir))
     with open(dir, mode="wt", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 

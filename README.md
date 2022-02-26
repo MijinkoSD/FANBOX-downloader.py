@@ -9,7 +9,37 @@ pixivFANBOXから画像や文章やファイルをダウンロードします。
   - これから制作します。
 
 ## 使い方
-Coming soon...
+### 準備
+1. Python3.10.2以降をインストールする。
+
+1. 以下のコマンドを実行しておく
+```
+python3 -m pip install -r requirements.txt
+```
+
+### 使い方
+```
+python3 main.py <クリエイターID>
+```
+クリエイターIDとはURLの以下の部分のこと
+- `https://www.fanbox.cc/@<クリエイターID>/`
+  - @を含めないように注意
+- `https://<クリエイターID>.fanbox.cc/`
+
+<br>
+
+有料プランの投稿をダウンロードする時はセッションIDを使う。
+```
+python3 main.py -t <セッションID> <クリエイターID>
+```
+セッションIDはブラウザの通信から抜き取れる。
+- セッションIDはログインしてからFANBOXのページを開くことで取得できる。
+  - cookieのFANBOXSESSIDの値がセッションID
+- `https://api.fanbox.cc/`との通信には大体入っている（はず）
+  - わからなければ`post.listCreator`とかを確認してみよう。
+
+cookieの中身を見れる拡張機能でも確認できるかも（未確認）
+
 
 ## 動作環境
 - Python 3.10.2

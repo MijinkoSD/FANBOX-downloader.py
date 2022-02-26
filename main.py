@@ -17,7 +17,6 @@ parser.add_argument("-f", "--force-update", action="store_true", help="以前ダ
 # parser.add_argument("-l", "--limit", type=int, help="1投稿者あたりの取得数。省略した場合は可能な限り取得します。")
 # parser.add_argument("--ignore-free-posts", action="store_true", help="無料の投稿に含まれる画像はダウンロードしません。")
 # parser.add_argument("--ignore-adult-contents", action="store_true", help="成人向けの投稿に含まれる画像はダウンロードしません。")
-# parser.add_argument("--include-higher-plan", action="store_true", help="未加入のプラン投稿も可能な限りダウンロードします。基本的にはサムネイルとタイトルのみが取得できるはずです。")
 parser.add_argument("creator_id", nargs="+", type=str, help="投稿者のID")
 
 if len(sys.argv) <= 1:

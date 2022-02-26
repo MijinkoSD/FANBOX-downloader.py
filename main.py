@@ -32,7 +32,7 @@ else:
 
 for cid in args.creator_id:
     fb = fanbox.Post(args=args, FANBOXSESSID=sessid, log_to_stdout=True)
-    fb.download(creatorId=cid, page_limit=1)
+    fb.download(creatorId=cid)
     sessid = fb.sessid
     fb = fanbox.File(args=args, FANBOXSESSID=sessid, log_to_stdout=True)
     fb.download(creatorId=cid)

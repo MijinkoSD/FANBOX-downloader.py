@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from time import sleep
-from typing import AnyStr
+from typing import Any, AnyStr
 import os
 import json
 import argparse
@@ -16,7 +16,8 @@ BASE_URL = "https://api.fanbox.cc/"
 BASE_LOCAL_DIR = "./posts/"
 
 
-def save_json(data:dict, dir:str):
+def save_json(data:Any, dir:str):
+    """変数の中身をjsonファイルに保存します。"""
     with open(dir, mode="wt", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 

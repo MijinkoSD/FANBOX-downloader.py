@@ -197,7 +197,7 @@ class File:
             patten = re.compile("^" + re.escape(creator_id) + "_\d{14}\.json$")
             files = [f for f in files if isfile(BASE_LOCAL_DIR, f) and bool(patten.match(f))]
             if files:
-                return sorted(files)[0]
+                return sorted(files, reverse=True)[0]
             else:
                 raise FileNotFoundError("保存済みの%sの投稿データが見つかりませんでした。" % creator_id)
         else:

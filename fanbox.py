@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from genericpath import exists
 from time import sleep
 from typing import Any, AnyStr
 import os
@@ -17,7 +18,7 @@ BASE_LOCAL_DIR = "./posts/"
 
 def save_json(data:Any, dir:str):
     """変数の中身をjsonファイルに保存します。"""
-    os.makedirs(os.path.dirname(dir))
+    os.makedirs(os.path.dirname(dir), exist_ok=True)
     with open(dir, mode="wt", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 

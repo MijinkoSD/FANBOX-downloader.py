@@ -71,12 +71,13 @@ class Post:
         "投稿データのダウンロードから保存までを全部自動でやってくれるありがたい関数。"
         data = self.get_creator_get()
         self.save_post(data, filename="%s_profile_%d.json")
+        if page_limit <= 0: return
         data = self.download_posts(self.get_paginateCreator(),limit=page_limit)
         self.save_post(data)
 
     def get_paginateCreator(self) -> dict:
         """post.paginateCreatorを叩いて全ページのURLを取得する。"""
-        self.__log("クリエイター情報をダウンロード中...")
+        self.__log("投稿データを確認中...")
         url = BASE_URL+"post.paginateCreator"
         payload = {"creatorId":self.creator_id}
         return self.__download_json(url, params=payload)
@@ -89,6 +90,7 @@ class Post:
     
     def get_creator_get(self) -> dict:
         """creator.getを叩いてクリエイターのFANBOX上のプロフィールなどを取得する。"""
+        self.__log("プロフィール情報をダウンロード中...")
         url = BASE_URL+"creator.get"
         payload = {"creatorId": self.creator_id}
         return self.__download_json(url, params=payload)

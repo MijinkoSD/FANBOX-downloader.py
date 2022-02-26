@@ -214,36 +214,55 @@ class File:
         with open(filedir, mode="rt", encoding="utf-8") as f:
             return json.load(f)
     
-    def __extract_file_url(self, postdata:list) -> dict[str, dict[str, list[str]]]:
+    def __extract_file_url(self, data:list, mode:str) -> dict[str, dict[str, list[str]]] | dict[str, list[str]]:
         """
         投稿データからダウンロード可能なURL（主に画像やファイルのもの）を返します。
         
         なお、ブログタイプの投稿に含まれるファイル・埋め込み、
         テキストタイプ、動画・音楽タイプの投稿に含まれるファイルは未確認のため対応していません。
         """
-
         urldata = {}
-        for d in postdata:
-            id = d["id"]
-            urldata[id] = {"image":[], "cover":[], "thumb":[], "file":[]} # 空であろうと必ずリスト型を保つ。
-            if d["coverImageUrl"] is not None:
-                urldata[id]["cover"] = [d["coverImageUrl"]]
-            if "files" in d["body"]:
-                urldata[id]["file"] += [u["url"] for u in d["body"]["files"] if "url" in u]
-            if "images" in d["body"]:
-                urldata[id]["image"] += [u["originalUrl"] for u in d["body"]["images"] if "originalUrl" in u]
-                urldata[id]["thumb"] += [u["thumbnailUrl"] for u in d["body"]["images"] if "thumbnailUrl" in u]
-            if "imageMap" in d["body"]:
-                urldata[id]["image"] += [u["originalUrl"] for u in d["body"]["imageMap"].values() if "originalUrl" in u]
-                urldata[id]["thumb"] += [u["thumbnailUrl"] for u in d["body"]["imageMap"].values() if "thumbnailUrl" in u]
-            # if "fileMap" in d["body"]:
-            # if "embedMap" in d["body"]:
-            # if "urlEmbedMap" in d["body"]:
+        if mode == "post":
+            for d in data:
+                id = d["id"]
+                urldata[id] = {"image":[], "cover":[], "thumb":[], "file":[]} # 空であろうと必ずリスト型を保つ。
+                if d["coverImageUrl"] is not None:
+                    urldata[id]["cover"] = [d["coverImageUrl"]]
+                if "files" in d["body"]:
+                    urldata[id]["file"] += [u["url"] for u in d["body"]["files"] if "url" in u]
+                if "images" in d["body"]:
+                    urldata[id]["image"] += [u["originalUrl"] for u in d["body"]["images"] if "originalUrl" in u]
+                    urldata[id]["thumb"] += [u["thumbnailUrl"] for u in d["body"]["images"] if "thumbnailUrl" in u]
+                if "imageMap" in d["body"]:
+                    urldata[id]["image"] += [u["originalUrl"] for u in d["body"]["imageMap"].values() if "originalUrl" in u]
+                    urldata[id]["thumb"] += [u["thumbnailUrl"] for u in d["body"]["imageMap"].values() if "thumbnailUrl" in u]
+                # if "fileMap" in d["body"]:
+                # if "embedMap" in d["body"]:
+                # if "urlEmbedMap" in d["body"]:
+        elif mode == "profile":
+            urldata = {"image":[], "cover":[], "thumb":[], "icon":[]} # 空であろうと必ずリスト型を保つ。
+            if data["body"]["user"]["iconUrl"] is not None:
+                urldata["icon"] += [data["body"]["user"]["iconUrl"]]
+            if data["body"]["coverImageUrl"] is not None:
+                urldata["cover"] += [data["body"]["coverImageUrl"]]
+            urldata["image"] = [u["imageUrl"] for u in data["body"]["profileItems"] if "imageUrl" in u]
+            urldata["thumb"] = [u["thumbnailUrl"] for u in data["body"]["profileItems"] if "thumbnailUrl" in u]
         return urldata
 
     def __get_urls_len(self, urls:dict[str, dict[str, list[str]]]) -> int:
-        """URLをまとめた変数の中にあるURLの数を数えます。"""
+        """URLをまとめた変数の中にある要素の数を数えます。"""
         count = 0
+
+        if type(urls) is dict:
+            for v in urls.values():
+                count += self.__get_urls_len(v)
+        elif type(urls) is list:
+            for v in urls:
+                count += self.__get_urls_len(v)
+        elif type(urls) is str:
+            count += 1
+        return count
+
         for i in urls.values():
             for k in i:
                 count += len(i[k])
@@ -283,7 +302,7 @@ class File:
             return count
 
         count = 0
-        urls = self.__extract_file_url(postdata=postdata)
+        urls = self.__extract_file_url(data=postdata, mode="post")
         max_count = self.__get_urls_len(urls)
         for postid, t in urls.items():
             os.makedirs(os.path.join(BASE_LOCAL_DIR, self.creator_id, postid), exist_ok=True)
@@ -291,3 +310,45 @@ class File:
             count = save(t["cover"], postid=postid, filetype="cover", count=count)
             count = save(t["thumb"], postid=postid, filetype="thumbnails", count=count)
             count = save(t["file"], postid=postid, filetype="files", count=count)
+
+    def download_files_on_profile(self, profiledata:dict):
+        """プロフィールに含まれるファイルをダウンロードします。"""
+        def save(urls:list[str], filetype:str, count:int) -> int:
+            """画像をダウンロードして保存する"""
+            if not urls: return count
+            dir = os.path.join(BASE_LOCAL_DIR, self.creator_id, filetype)
+            os.makedirs(dir, exist_ok=True)
+            for url in urls:
+                count += 1
+                self.__log("プロフィール画像をダウンロード中...(%d/%d件)" % (count, max_count))
+                try:
+                    r = self.session.get(url, timeout=(6.0, 12.0))
+                except requests.exceptions.Timeout:
+                    self.__log("接続がタイムアウトしました。")
+                    self.__log("　URL: " + url)
+                    sleep(WAIT_TIME)
+                    continue
+                except ConnectionError as e:
+                    self.__log("通信が切断されました。")
+                    self.__log("　URL: " + url)
+                    self.__log("　例外: " + e)
+                    sleep(WAIT_TIME)
+                    continue
+                try:
+                    r.raise_for_status()
+                except requests.RequestException as e:
+                    self.__log("ファイルの取得に失敗しました。")
+                    self.__log("　ステータスコード: " + str(r.status_code))
+                with open(os.path.join(dir, os.path.basename(url)), mode="wb") as f:
+                    f.write(r.content)
+                sleep(WAIT_TIME)
+            return count
+        count = 0
+        urls = self.__extract_file_url(data=profiledata, mode="profile")
+        max_count = self.__get_urls_len(urls)
+        for postid, t in urls.items():
+            os.makedirs(os.path.join(BASE_LOCAL_DIR, self.creator_id, postid), exist_ok=True)
+            count = save(t["image"], postid=postid, filetype="images", count=count)
+            count = save(t["cover"], postid=postid, filetype="cover", count=count)
+            count = save(t["thumb"], postid=postid, filetype="thumbnails", count=count)
+            count = save(t["icon"], postid=postid, filetype="icon", count=count)

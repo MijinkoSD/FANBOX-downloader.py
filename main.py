@@ -31,9 +31,9 @@ else:
     sessid = args.session_id
 
 for cid in args.creator_id:
-    fb = fanbox.Post(args=args, FANBOXSESSID=sessid, log_to_stdout=True)
-    fb.download(creatorId=cid)
+    fb = fanbox.Post(creator_id=cid, args=args, FANBOXSESSID=sessid, log_to_stdout=True)
+    fb.download()
     sessid = fb.sessid
-    fb = fanbox.File(args=args, FANBOXSESSID=sessid, log_to_stdout=True)
-    fb.download(creatorId=cid)
+    fb = fanbox.File(creator_id=cid, args=args, FANBOXSESSID=sessid, log_to_stdout=True)
+    fb.download()
     sessid = fb.sessid

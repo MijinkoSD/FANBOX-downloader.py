@@ -35,8 +35,9 @@ def print_with_timestamp(value:str, utc_add=9) -> None:
 WAIT_TIME = 1
 
 class Post:
-    def __init__(self, args:argparse.Namespace={}, FANBOXSESSID:str="", log_to_stdout:bool=False):
+    def __init__(self, creator_id:str, args:argparse.Namespace={}, FANBOXSESSID:str="", log_to_stdout:bool=False):
         """FANBOXの投稿の内、ファイル以外の要素（文章やページを構成するデータ）を取得するクラスです。"""
+        self.creator_id = creator_id
         self.args = args
         self.session = requests.Session()
         if FANBOXSESSID: self.sessid = FANBOXSESSID
@@ -66,16 +67,16 @@ class Post:
         if self.is_print_log:
             print_with_timestamp(value=value, utc_add=utc_add)
 
-    def download(self, creatorId:str, page_limit:int|None = None) -> None:
+    def download(self, page_limit:int|None = None) -> None:
         "投稿データのダウンロードから保存までを全部自動でやってくれるありがたい関数。"
-        data = self.download_posts(self.get_paginateCreator(creatorId=creatorId),limit=page_limit)
-        self.save_post(data, creator_id=creatorId)
+        data = self.download_posts(self.get_paginateCreator(),limit=page_limit)
+        self.save_post(data)
 
-    def get_paginateCreator(self, creatorId:str) -> dict:
+    def get_paginateCreator(self) -> dict:
         """post.paginateCreatorを叩いて全ページのURLを取得する。"""
         self.__log("クリエイター情報をダウンロード中...")
         url = BASE_URL+"post.paginateCreator"
-        payload = {"creatorId":creatorId}
+        payload = {"creatorId":self.creator_id}
         return self.__download_json(url, params=payload)
     
     def get_listCreator(self, **kwargs) -> dict:
@@ -112,14 +113,15 @@ class Post:
             sleep(WAIT_TIME)
         return posts
 
-    def save_post(self, data:list, creator_id:str) -> None:
+    def save_post(self, data:list) -> None:
         """ダウンロードした投稿データをローカルに保存します。"""
-        filedir = os.path.join(BASE_LOCAL_DIR, "%s_%d.json" % (creator_id, time_now()))
+        filedir = os.path.join(BASE_LOCAL_DIR, "%s_%d.json" % (self.creator_id, time_now()))
         save_json(data, filedir)
 
 class File:
-    def __init__(self, args:argparse.Namespace={}, FANBOXSESSID:str="", log_to_stdout:bool=False):
+    def __init__(self, creator_id:str, args:argparse.Namespace={}, FANBOXSESSID:str="", log_to_stdout:bool=False):
         """FANBOXの投稿の内、ファイルや画像を取得するクラスです。"""
+        self.creator_id = creator_id
         self.args = args
         self.session = requests.Session()
         if FANBOXSESSID: self.sessid = FANBOXSESSID
@@ -149,12 +151,12 @@ class File:
         if self.is_print_log:
             print_with_timestamp(value=value, utc_add=utc_add)
 
-    def download(self, creatorId:str):
+    def download(self):
         "添付ファイルのダウンロードから保存までを全部自動でやってくれるありがたい関数。"
-        data = self.getpostdata(creatorId=creatorId)
-        self.download_files(postdata=data, creatorId=creatorId)
+        data = self.getpostdata()
+        self.download_files(postdata=data)
 
-    def __search_post_filename(self, creatorId:str, date:int=None) -> str:
+    def __search_post_filename(self, creator_id:str, date:int=None) -> str:
         """
         指定した投稿者のダウンロード済みの投稿データの中からファイル名を1つ返します。
 
@@ -163,7 +165,7 @@ class File:
 
         Params
         --------
-        creatorId:
+        creator_id:
             投稿者のID。
         date:
             日付時刻を指定します。
@@ -176,23 +178,23 @@ class File:
         
         if date is None:
             files = os.listdir(path=BASE_LOCAL_DIR)
-            patten = re.compile("^" + re.escape(creatorId) + "_\d{14}\.json$")
+            patten = re.compile("^" + re.escape(creator_id) + "_\d{14}\.json$")
             files = [f for f in files if isfile(BASE_LOCAL_DIR, f) and bool(patten.match(f))]
             if files:
                 return sorted(files)[0]
             else:
-                raise FileNotFoundError("保存済みの%sの投稿データが見つかりませんでした。" % creatorId)
+                raise FileNotFoundError("保存済みの%sの投稿データが見つかりませんでした。" % creator_id)
         else:
-            file = creatorId+str(date)+".json"
+            file = creator_id+str(date)+".json"
             if isfile(BASE_LOCAL_DIR, file):
                 return file
             else:
                 raise FileNotFoundError("%sというファイルが見つかりませんでした。" % file)
 
-    def getpostdata(self, creatorId:str) -> list:
+    def getpostdata(self) -> list:
         """最新の投稿データを読み込み、そのデータを返します。"""
         filedir = os.path.join(BASE_LOCAL_DIR,
-                               self.__search_post_filename(creatorId=creatorId))
+                               self.__search_post_filename(creator_id=self.creator_id))
         with open(filedir, mode="rt", encoding="utf-8") as f:
             return json.load(f)
     
@@ -231,12 +233,12 @@ class File:
                 count += len(i[k])
         return count
 
-    def download_files(self, postdata:dict, creatorId:str) -> None:
+    def download_files(self, postdata:dict) -> None:
         """投稿データから添付ファイルや画像等をダウンロードします。"""
         def save(urls:list[str], postid:str, filetype:str, count:int) -> int:
             """画像をダウンロードして保存する"""
             if not urls: return count
-            dir = os.path.join(BASE_LOCAL_DIR, creatorId, postid, filetype)
+            dir = os.path.join(BASE_LOCAL_DIR, self.creator_id, postid, filetype)
             os.makedirs(dir, exist_ok=True)
             for url in urls:
                 count += 1
@@ -268,7 +270,7 @@ class File:
         urls = self.__extract_file_url(postdata=postdata)
         max_count = self.__get_urls_len(urls)
         for postid, t in urls.items():
-            os.makedirs(os.path.join(BASE_LOCAL_DIR, creatorId, postid), exist_ok=True)
+            os.makedirs(os.path.join(BASE_LOCAL_DIR, self.creator_id, postid), exist_ok=True)
             count = save(t["image"], postid=postid, filetype="images", count=count)
             count = save(t["cover"], postid=postid, filetype="cover", count=count)
             count = save(t["thumb"], postid=postid, filetype="thumbnail", count=count)

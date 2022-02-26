@@ -35,6 +35,7 @@ WAIT_TIME = 1
 
 class Post:
     def __init__(self, args:argparse.Namespace={}, FANBOXSESSID:str="", log_to_stdout:bool=False):
+        """FANBOXの投稿の内、ファイル以外の要素（文章やページを構成するデータ）を取得するクラスです。"""
         self.args = args
         self.session = requests.Session()
         if FANBOXSESSID: self.sessid = FANBOXSESSID
@@ -117,6 +118,7 @@ class Post:
 
 class File:
     def __init__(self, args:argparse.Namespace={}, FANBOXSESSID:str="", log_to_stdout:bool=False):
+        """FANBOXの投稿の内、ファイルや画像を取得するクラスです。"""
         self.args = args
         self.session = requests.Session()
         if FANBOXSESSID: self.sessid = FANBOXSESSID

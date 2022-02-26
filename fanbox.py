@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-from genericpath import exists
 from time import sleep
 from typing import Any, AnyStr
 import os
@@ -33,7 +32,7 @@ def print_with_timestamp(value:str, utc_add=9) -> None:
     timestamp = now.strftime('[%Y/%m/%d %H:%M:%S] ')
     print(timestamp+str(value))
 
-WAIT_TIME = 1
+WAIT_TIME = 0.2
 
 class Post:
     def __init__(self, creator_id:str, args:argparse.Namespace={}, FANBOXSESSID:str="", log_to_stdout:bool=False):
@@ -266,13 +265,27 @@ class File:
         
         なお、ブログタイプの投稿に含まれるファイル・埋め込み、
         テキストタイプ、動画・音楽タイプの投稿に含まれるファイルは未確認のため対応していません。
+
+        Return
+        -------
+        ```json
+        {
+            <post_id>: {
+                "image":[<URL>],
+                "cover":[<URL>],
+                "thumb":[<URL>],
+                "file" :[<URL>]
+            }
+        }
+        ```
         """
         urldata = {}
         for d in data:
             id = d["id"]
             urldata[id] = {"image":[], "cover":[], "thumb":[], "file":[]} # 空であろうと必ずリスト型を保つ。
             if d["coverImageUrl"] is not None:
-                urldata[id]["cover"] = [d["coverImageUrl"]]
+                urldata[id]["cover"] += [d["coverImageUrl"]]
+            if d["body"] is None: continue # d["body"]の中身が空の場合は何もしない。
             if "files" in d["body"]:
                 urldata[id]["file"] += [u["url"] for u in d["body"]["files"] if "url" in u]
             if "images" in d["body"]:
@@ -287,7 +300,20 @@ class File:
         return urldata
     
     def __extract_profile_url(self, data:list) -> dict[str, list[str]]:
-        """プロフィールデータからダウンロード可能なURL（主に画像やファイルのもの）を返します。"""
+        """
+        プロフィールデータからダウンロード可能なURL（主に画像やファイルのもの）を返します。
+        
+        Return
+        --------
+        ```json
+        {
+            "image":[<URL>],
+            "cover":[<URL>],
+            "thumb":[<URL>],
+            "icon" :[<URL>]
+        }
+        ```
+        """
         urldata = {"image":[], "cover":[], "thumb":[], "icon":[]} # 空であろうと必ずリスト型を保つ。
         if data["body"]["user"]["iconUrl"] is not None:
             urldata["icon"] += [data["body"]["user"]["iconUrl"]]

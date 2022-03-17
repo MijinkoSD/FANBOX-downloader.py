@@ -73,7 +73,7 @@ class Post:
         self.save_post(data, filename="%s_profile_%d.json")
         if page_limit is int:
             if page_limit == 0: return
-        data = self.download_posts(self.get_paginateCreator(),limit=page_limit)
+        data = self.download_postlist(self.get_paginateCreator(),limit=page_limit)
         self.save_post(data)
 
     def get_paginateCreator(self) -> dict:
@@ -113,8 +113,8 @@ class Post:
             return {}
         return r.json()
 
-    def download_posts(self, paginate:dict, limit=None) -> list:
-        """投稿データを全てダウンロードして返します。"""
+    def download_postlist(self, paginate:dict, limit=None) -> list:
+        """投稿データ一覧を全てダウンロードして返します。"""
         posts = []
         if limit is None: limit = len(paginate["body"])
         for i in range(limit):

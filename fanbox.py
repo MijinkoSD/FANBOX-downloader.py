@@ -84,7 +84,7 @@ class Post:
         return self.__download_json(url, params=payload)
     
     def get_listCreator(self, **kwargs) -> dict:
-        """post.listCreatorを叩いてページの詳細情報を取得する。"""
+        """post.listCreatorを叩いてページ一覧の情報を取得する。"""
         url = BASE_URL+"post.listCreator"
         payload = kwargs
         return self.__download_json(url, params=payload)

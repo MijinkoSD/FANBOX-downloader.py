@@ -1,4 +1,5 @@
 test.py
 posts/
+profile/
 __pycache__
 *.json

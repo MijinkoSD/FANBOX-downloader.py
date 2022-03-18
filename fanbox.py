@@ -13,6 +13,7 @@ import requests
 
 BASE_URL = "https://api.fanbox.cc/"
 BASE_LOCAL_DIR = "./posts/"
+BASE_LOCAL_PROFILE_DIR = "./profile/"
 
 
 def save_json(data:Any, dir:str):
@@ -71,7 +72,7 @@ class Post:
         "投稿データのダウンロードから保存までを全部自動でやってくれるありがたい関数。"
         # クリエイター情報の取得
         data = self.get_creator_get()
-        self.save_postlist(data, filename="%s_profile_%d.json")
+        self.save_postlist(data, parentdir=BASE_LOCAL_PROFILE_DIR, filename="%s_profile_%d.json")
         # 投稿データ一覧の取得
         if page_limit is int:
             if page_limit == 0: return
@@ -145,7 +146,7 @@ class Post:
         payload = {"postId":id}
         return self.__download_json(url, params=payload)
     
-    def save_postlist(self, data:list, filename="%s_%d.json") -> None:
+    def save_postlist(self, data:list, parentdir:str=BASE_LOCAL_DIR, filename="%s_%d.json") -> None:
         """
         ダウンロードした投稿データ一覧をローカルに保存します。
         
@@ -156,7 +157,7 @@ class Post:
         filename:
             保存するときのファイル名。
         """
-        filedir = os.path.join(BASE_LOCAL_DIR, filename % (self.creator_id, time_now()))
+        filedir = os.path.join(parentdir, filename % (self.creator_id, time_now()))
         save_json(data, filedir)
 
 class File:
@@ -242,8 +243,8 @@ class File:
     def get_profile(self) -> list:
         """最新のプロフィールデータを読み込み、そのデータを返します。"""
         pattern = "^" + re.escape(self.creator_id) + "_profile_\d{14}\.json$"
-        filedir = os.path.join(BASE_LOCAL_DIR,
-                               self.__search_latest_filename(pattern=pattern))
+        filedir = os.path.join(BASE_LOCAL_PROFILE_DIR,
+                               self.__search_latest_filename(path=BASE_LOCAL_PROFILE_DIR, pattern=pattern))
         with open(filedir, mode="rt", encoding="utf-8") as f:
             return json.load(f)
     

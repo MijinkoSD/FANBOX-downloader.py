@@ -394,7 +394,7 @@ class File:
         def save(urls:list[str], filetype:str, count:int) -> int:
             """画像をダウンロードして保存する"""
             if not urls: return count
-            dir = os.path.join(BASE_LOCAL_DIR, "profile", self.creator_id, filetype)
+            dir = os.path.join(BASE_LOCAL_PROFILE_DIR, self.creator_id, filetype)
             os.makedirs(dir, exist_ok=True)
             for url in urls:
                 count += 1
@@ -428,7 +428,7 @@ class File:
         count = 0
         urls = self.__extract_profile_url(data=profiledata)
         max_count = self.__get_urls_len(urls)
-        os.makedirs(os.path.join(BASE_LOCAL_DIR, "profile", self.creator_id), exist_ok=True)
+        os.makedirs(os.path.join(BASE_LOCAL_PROFILE_DIR, self.creator_id), exist_ok=True)
         count = save(urls["image"], filetype="images", count=count)
         count = save(urls["cover"], filetype="cover", count=count)
         count = save(urls["thumb"], filetype="thumbnails", count=count)

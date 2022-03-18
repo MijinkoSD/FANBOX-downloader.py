@@ -198,76 +198,6 @@ class File:
         self.download_files_on_profile(profiledata=data)
         # data = self.get_postlist()
         self.download_files_all()
-
-    def __search_postlist_filename(self, creator_id:str, date:int=None) -> str:
-        """
-        指定した投稿者のダウンロード済みの投稿データの中からファイル名を1つ返します。
-
-        dateを省略した場合は一番新しい日付時刻のファイル名を返します。
-        
-
-        Params
-        --------
-        creator_id:
-            投稿者のID。
-        date:
-            日付時刻を指定します。
-            `YYYYMMDDhhmmss`の形式で渡さなければなりません。
-            合致するファイルがない場合はNoneを返します。
-            省略した場合は存在するファイルのうち一番最新のものを返します。
-        """
-        def isfile(basedir, file) -> bool:
-            return os.path.isfile(os.path.join(basedir, file))
-        
-        if date is None:
-            files = os.listdir(path=BASE_LOCAL_DIR)
-            patten = re.compile("^" + re.escape(creator_id) + "_\d{14}\.json$")
-            files = [f for f in files if isfile(BASE_LOCAL_DIR, f) and bool(patten.match(f))]
-            if files:
-                return sorted(files, reverse=True)[0]
-            else:
-                raise FileNotFoundError("保存済みの%sの投稿データが見つかりませんでした。" % creator_id)
-        else:
-            file = creator_id+"_"+str(date)+".json"
-            if isfile(BASE_LOCAL_DIR, file):
-                return file
-            else:
-                raise FileNotFoundError("%sというファイルが見つかりませんでした。" % file)
-
-    def __search_profile_filename(self, creator_id:str, date:int=None) -> str:
-        """
-        指定した投稿者のダウンロード済みの投稿データの中からファイル名を1つ返します。
-
-        dateを省略した場合は一番新しい日付時刻のファイル名を返します。
-
-
-        Params
-        --------
-        creator_id:
-            投稿者のID。
-        date:
-            日付時刻を指定します。
-            `YYYYMMDDhhmmss`の形式で渡さなければなりません。
-            合致するファイルがない場合はNoneを返します。
-            省略した場合は存在するファイルのうち一番最新のものを返します。
-        """
-        def isfile(basedir, file) -> bool:
-            return os.path.isfile(os.path.join(basedir, file))
-        
-        if date is None:
-            files = os.listdir(path=BASE_LOCAL_DIR)
-            patten = re.compile("^" + re.escape(creator_id) + "_profile_\d{14}\.json$")
-            files = [f for f in files if isfile(BASE_LOCAL_DIR, f) and bool(patten.match(f))]
-            if files:
-                return sorted(files, reverse=True)[0]
-            else:
-                raise FileNotFoundError("保存済みの%sのプロフィールデータが見つかりませんでした。" % creator_id)
-        else:
-            file = creator_id+"_profile_"+str(date)+".json"
-            if isfile(BASE_LOCAL_DIR, file):
-                return file
-            else:
-                raise FileNotFoundError("%sというファイルが見つかりませんでした。" % file)
     
     def __search_latest_filename(self, path:str=BASE_LOCAL_DIR, pattern:str="") -> str:
         """
@@ -294,8 +224,6 @@ class File:
         
     def get_postdata(self, postid:str) -> dict:
         """最新の投稿データを読み込み、そのデータを返します。"""
-        # filedir = os.path.join(BASE_LOCAL_DIR,
-        #                        self.__search_postlist_filename(creator_id=self.creator_id))
         pattern = "^\d{14}\.json$"
         parentdir = os.path.join(BASE_LOCAL_DIR, self.creator_id, postid, "posts")
         filename = self.__search_latest_filename(path=parentdir, pattern=pattern)
@@ -305,8 +233,6 @@ class File:
     
     def get_postlist(self) -> dict:
         """最新の投稿一覧のデータを読み込み、そのデータを返します。"""
-        # filedir = os.path.join(BASE_LOCAL_DIR,
-        #                        self.__search_postlist_filename(creator_id=self.creator_id))
         pattern = "^" + re.escape(self.creator_id) + "_\d{14}\.json$"
         filedir = os.path.join(BASE_LOCAL_DIR,
                                self.__search_latest_filename(pattern=pattern))
@@ -315,8 +241,6 @@ class File:
 
     def get_profile(self) -> list:
         """最新のプロフィールデータを読み込み、そのデータを返します。"""
-        # filedir = os.path.join(BASE_LOCAL_DIR,
-        #                        self.__search_profile_filename(creator_id=self.creator_id))
         pattern = "^" + re.escape(self.creator_id) + "_profile_\d{14}\.json$"
         filedir = os.path.join(BASE_LOCAL_DIR,
                                self.__search_latest_filename(pattern=pattern))
@@ -463,57 +387,6 @@ class File:
             save(t["thumb"], postid=postid, filetype="thumbnails")
             save(t["file"], postid=postid, filetype="files")
     
-    def download_files_old(self, postdata:dict) -> None:
-        """
-        投稿データから添付ファイルや画像等をダウンロードします。
-        
-        この関数はバックアップです。
-        """
-        def save(urls:list[str], postid:str, filetype:str, count:int) -> int:
-            """画像をダウンロードして保存する"""
-            if not urls: return count
-            dir = os.path.join(BASE_LOCAL_DIR, self.creator_id, postid, filetype)
-            os.makedirs(dir, exist_ok=True)
-            for url in urls:
-                count += 1
-                if (os.path.isfile(os.path.join(dir, os.path.basename(url)))
-                        and not self.args.force_update):
-                    self.__log("ファイルのダウンロードをスキップ(%d/%d件)" % (count, max_count))
-                    continue
-                self.__log("ファイルをダウンロード中...(%d/%d件)" % (count, max_count))
-                try:
-                    r = self.session.get(url, timeout=(6.0, 12.0))
-                except requests.exceptions.Timeout:
-                    self.__log("接続がタイムアウトしました。")
-                    self.__log("　URL: " + url)
-                    sleep(WAIT_TIME)
-                    continue
-                except ConnectionError as e:
-                    self.__log("通信が切断されました。")
-                    self.__log("　URL: " + url)
-                    self.__log("　例外: " + e)
-                    sleep(WAIT_TIME)
-                    continue
-                try:
-                    r.raise_for_status()
-                except requests.RequestException as e:
-                    self.__log("ファイルの取得に失敗しました。")
-                    self.__log("　ステータスコード: " + str(r.status_code))
-                with open(os.path.join(dir, os.path.basename(url)), mode="wb") as f:
-                    f.write(r.content)
-                sleep(WAIT_TIME)
-            return count
-
-        count = 0
-        urls = self.__extract_file_url(data=postdata)
-        max_count = self.__get_urls_len(urls)
-        for postid, t in urls.items():
-            if self.__get_urls_len(t) == 0: continue
-            os.makedirs(os.path.join(BASE_LOCAL_DIR, self.creator_id, postid), exist_ok=True)
-            count = save(t["image"], postid=postid, filetype="images", count=count)
-            count = save(t["cover"], postid=postid, filetype="cover", count=count)
-            count = save(t["thumb"], postid=postid, filetype="thumbnails", count=count)
-            count = save(t["file"], postid=postid, filetype="files", count=count)
 
     def download_files_on_profile(self, profiledata:dict) -> None:
         """プロフィールに含まれるファイルをダウンロードします。"""

@@ -135,7 +135,7 @@ class Post:
             self.__log("投稿データをダウンロード中...(%d/%d件)" % (i+1, len(ids)))
             data = self.download_postdata(ids[i])
             filename = str(time_now()) + ".json"
-            filedir = os.path.join(BASE_LOCAL_DIR, self.creator_id, ids[i], "posts", filename)
+            filedir = os.path.join(BASE_LOCAL_DIR, self.creator_id, ids[i], "post", filename)
             save_json(data, filedir)
             sleep(WAIT_TIME)
 
@@ -225,7 +225,7 @@ class File:
     def get_postdata(self, postid:str) -> dict:
         """最新の投稿データを読み込み、そのデータを返します。"""
         pattern = "^\d{14}\.json$"
-        parentdir = os.path.join(BASE_LOCAL_DIR, self.creator_id, postid, "posts")
+        parentdir = os.path.join(BASE_LOCAL_DIR, self.creator_id, postid, "post")
         filename = self.__search_latest_filename(path=parentdir, pattern=pattern)
         filedir = os.path.join(parentdir, filename)
         with open(filedir, mode="rt", encoding="utf-8") as f:

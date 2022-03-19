@@ -118,6 +118,29 @@ class Post:
             return {}
         return r.json()
 
+    def __search_latest_filename(self, path:str=BASE_LOCAL_DIR, pattern:str="") -> str:
+        """
+        指定したパターンに合致するファイルの中で一番新しいものを返します。
+
+        Params
+        --------
+        path:
+            検索するファイルが存在するディレクトリ。
+        pattern:
+            検索パターン。
+        """
+        def isfile(basedir, file) -> bool:
+            """パスがファイルかどうかを判別する"""
+            return os.path.isfile(os.path.join(basedir, file))
+        
+        files = os.listdir(path=path)
+        patten = re.compile(pattern)
+        files = [f for f in files if isfile(path, f) and bool(patten.match(f))]
+        if files:
+            return sorted(files, reverse=True)[0]
+        else:
+            raise FileNotFoundError("保存済みのファイルが見つかりませんでした。\n　検索場所：%s\n　検索パターン：%s" % (path, pattern))
+
     def download_postlist(self, paginate:dict, limit=None) -> list:
         """投稿データ一覧を全てダウンロードして返します。"""
         posts = []
@@ -126,19 +149,29 @@ class Post:
             self.__log( "投稿データ一覧を取得中...(%d/%d件)" % (i+1, limit) )
             param = self.__query_parse(paginate["body"][i])
             posts += self.get_listCreator(**param)["body"]["items"]
-            sleep(WAIT_TIME)
+            sleep(WAIT_TIME/3)
         return posts
 
     def download_postdata_all(self, postlist:list) -> None:
         """投稿データ一覧を元に投稿データを取得して保存します。"""
         ids = [d["id"] for d in postlist]
         for i in range(len(ids)):
+            filename = str(time_now()) + ".json"
+            filedir = os.path.join(BASE_LOCAL_DIR, self.creator_id, ids[i], "post")
+            filepath = os.path.join(filedir, filename)
+            try:
+                self.__search_latest_filename(path=filedir, pattern="^\d{14}\.json$")
+            except FileNotFoundError:
+                pass
+            else:
+                if not self.args.update_posts:
+                    self.__log("投稿データのダウンロードをスキップ(%d/%d件)" % (i+1, len(ids)))
+                    continue
+            
             self.__log("投稿データをダウンロード中...(%d/%d件)" % (i+1, len(ids)))
             data = self.download_postdata(ids[i])
-            filename = str(time_now()) + ".json"
-            filedir = os.path.join(BASE_LOCAL_DIR, self.creator_id, ids[i], "post", filename)
-            save_json(data, filedir)
-            sleep(WAIT_TIME)
+            save_json(data, filepath)
+            sleep(WAIT_TIME/3)
 
     def download_postdata(self, id:list) -> dict:
         """投稿IDを元に投稿データを取得して返します。"""

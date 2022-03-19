@@ -1,5 +1,6 @@
 test.py
 posts/
 profile/
-__pycache__
+__pycache__/
+.vscode/
 *.json

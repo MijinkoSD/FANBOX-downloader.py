@@ -28,16 +28,20 @@ def time_now(utc_add=9) -> int:
     return int(now.strftime('%Y%m%d%H%M%S'))
 
 def print_with_timestamp(value:str, utc_add=9) -> None:
-    """頭に時刻表記を追加したうえでprintする。"""
+    """頭に時刻表記を追加した上でprintする。"""
     now = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=utc_add)))
     timestamp = now.strftime('[%Y/%m/%d %H:%M:%S] ')
-    print(timestamp+str(value))
+    text = value.splitlines()
+    if len(text) > 1:
+        # 2行目以降は日付ではなく空白を入れる
+        text = [text[0], *[' '*22 + t for t in text[1:]]]
+    print(timestamp+"\n".join(text))
 
 WAIT_TIME = 0.2
 
-class Post:
+class Session:
     def __init__(self, creator_id:str, args:argparse.Namespace={}, FANBOXSESSID:str="", log_to_stdout:bool=False):
-        """FANBOXの投稿の内、ファイル以外の要素（文章やページを構成するデータ）を取得するクラスです。"""
+        """APIと通信するための基本的な枠組みを提供する基底クラスです。"""
         self.creator_id = creator_id
         self.args = args
         self.session = requests.Session()
@@ -62,11 +66,14 @@ class Post:
     def sessid(self, value):
         """FANBOXSESSID"""
         self.session.cookies.set("FANBOXSESSID", value, domain='.fanbox.cc')
-
-    def __log(self, value:str, utc_add=9):
+    
+    def _log(self, value:str, utc_add=9):
         """タイムスタンプをつけてログを出力する。"""
         if self.is_print_log:
             print_with_timestamp(value=value, utc_add=utc_add)
+
+class Post(Session):
+    """FANBOXの投稿の内、ファイル以外の要素（文章やページを構成するデータ）を取得するクラスです。"""
 
     def download(self, page_limit:int|None = None) -> None:
         "投稿データのダウンロードから保存までを全部自動でやってくれるありがたい関数。"
@@ -83,7 +90,7 @@ class Post:
 
     def get_paginateCreator(self) -> dict:
         """post.paginateCreatorを叩いて全ページのURLを取得する。"""
-        self.__log("投稿データを確認中...")
+        self._log("投稿データを確認中...")
         url = BASE_URL+"post.paginateCreator"
         payload = {"creatorId":self.creator_id}
         return self.__download_json(url, params=payload)
@@ -96,7 +103,7 @@ class Post:
     
     def get_creator_get(self) -> dict:
         """creator.getを叩いてクリエイターのFANBOX上のプロフィールなどを取得する。"""
-        self.__log("プロフィール情報をダウンロード中...")
+        self._log("プロフィール情報をダウンロード中...")
         url = BASE_URL+"creator.get"
         payload = {"creatorId": self.creator_id}
         return self.__download_json(url, params=payload)
@@ -139,14 +146,19 @@ class Post:
         if files:
             return sorted(files, reverse=True)[0]
         else:
-            raise FileNotFoundError("保存済みのファイルが見つかりませんでした。\n　検索場所：%s\n　検索パターン：%s" % (path, pattern))
+            raise FileNotFoundError(
+                "保存済みのファイルが見つかりませんでした。\n"
+                "　検索場所：%s\n"
+                "　検索パターン：%s"
+                % (path, pattern)
+            )
 
     def download_postlist(self, paginate:dict, limit=None) -> list:
         """投稿データ一覧を全てダウンロードして返します。"""
         posts = []
         if limit is None: limit = len(paginate["body"])
         for i in range(limit):
-            self.__log( "投稿データ一覧を取得中...(%d/%d件)" % (i+1, limit) )
+            self._log( "投稿データ一覧を取得中...(%d/%d件)" % (i+1, limit) )
             param = self.__query_parse(paginate["body"][i])
             posts += self.get_listCreator(**param)["body"]["items"]
             sleep(WAIT_TIME/3)
@@ -155,9 +167,9 @@ class Post:
     def download_postdata_all(self, postlist:list) -> None:
         """投稿データ一覧を元に投稿データを取得して保存します。"""
         ids = [d["id"] for d in postlist]
-        for i in range(len(ids)):
+        for i, id in enumerate(ids):
             filename = str(time_now()) + ".json"
-            filedir = os.path.join(BASE_LOCAL_DIR, self.creator_id, ids[i], "post")
+            filedir = os.path.join(BASE_LOCAL_DIR, self.creator_id, id, "post")
             filepath = os.path.join(filedir, filename)
             try:
                 self.__search_latest_filename(path=filedir, pattern="^\d{14}\.json$")
@@ -165,11 +177,11 @@ class Post:
                 pass
             else:
                 if not self.args.update_posts:
-                    self.__log("投稿データのダウンロードをスキップ(%d/%d件)" % (i+1, len(ids)))
+                    self._log("投稿データのダウンロードをスキップ(%d/%d件)" % (i+1, len(ids)))
                     continue
             
-            self.__log("投稿データをダウンロード中...(%d/%d件)" % (i+1, len(ids)))
-            data = self.download_postdata(ids[i])
+            self._log("投稿データをダウンロード中...(%d/%d件)" % (i+1, len(ids)))
+            data = self.download_postdata(id)
             save_json(data, filepath)
             sleep(WAIT_TIME/3)
 
@@ -193,38 +205,8 @@ class Post:
         filedir = os.path.join(parentdir, filename % (self.creator_id, time_now()))
         save_json(data, filedir)
 
-class File:
-    def __init__(self, creator_id:str, args:argparse.Namespace={}, FANBOXSESSID:str="", log_to_stdout:bool=False):
-        """FANBOXの投稿の内、ファイルや画像を取得するクラスです。"""
-        self.creator_id = creator_id
-        self.args = args
-        self.session = requests.Session()
-        if FANBOXSESSID: self.sessid = FANBOXSESSID
-        else: self.sessid = ""
-        self.session.headers = {
-            "accept"         : "application/json, text/plain, */*",
-            "accept-encoding": "gzip, deflate, br",
-            "accept-language": "ja,en-US;q=0.9,en;q=0.8",
-            "origin"         : "https://www.fanbox.cc",
-            "referer"        : "https://www.fanbox.cc/",
-            "user-agent"     : "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/98.0.4758.102 Safari/537.36"
-        }
-        self.is_print_log = log_to_stdout
-    
-    @property
-    def sessid(self):
-        """FANBOXSESSID"""
-        return self.session.cookies.get("FANBOXSESSID")
-    
-    @sessid.setter
-    def sessid(self, value):
-        """FANBOXSESSID"""
-        self.session.cookies.set("FANBOXSESSID", value, domain='.fanbox.cc')
-    
-    def __log(self, value:str, utc_add=9):
-        """タイムスタンプをつけてログを出力する。"""
-        if self.is_print_log:
-            print_with_timestamp(value=value, utc_add=utc_add)
+class File(Session):
+    """FANBOXの投稿の内、ファイルや画像を取得するクラスです。"""
 
     def download(self):
         "添付ファイルのダウンロードから保存までを全部自動でやってくれるありがたい関数。"
@@ -254,7 +236,12 @@ class File:
         if files:
             return sorted(files, reverse=True)[0]
         else:
-            raise FileNotFoundError("保存済みのファイルが見つかりませんでした。\n　検索場所：%s\n　検索パターン：%s" % (path, pattern))
+            raise FileNotFoundError(
+                "保存済みのファイルが見つかりませんでした。\n"
+                "　検索場所：%s\n"
+                "　検索パターン：%s"
+                % (path, pattern)
+            )
         
     def get_postdata(self, postid:str) -> dict:
         """最新の投稿データを読み込み、そのデータを返します。"""
@@ -281,7 +268,7 @@ class File:
         with open(filedir, mode="rt", encoding="utf-8") as f:
             return json.load(f)
     
-    def __extract_file_url(self, data:list) -> dict[str, dict[str, list[str]]]:
+    def __extract_file_url(self, data:list) -> dict[str, list[str]]:
         """
         投稿データからダウンロード可能なURL（主に画像やファイルのもの）を返します。
         
@@ -292,35 +279,33 @@ class File:
         -------
         ```json
         {
-            <post_id>: {
-                "image":[<URL>],
-                "cover":[<URL>],
-                "thumb":[<URL>],
-                "file" :[<URL>]
-            }
+            "id"   :[<post_id>],
+            "image":[<URL>],
+            "cover":[<URL>],
+            "thumb":[<URL>],
+            "file" :[<URL>]
         }
         ```
         """
-        urldata = {}
 
         d = data["body"]
-        id = d["id"]
-        urldata[id] = {"image":[], "cover":[], "thumb":[], "file":[]} # 空であろうと必ずリスト型を保つ。
+        body = d["body"]
+        image, cover, thumb, file = [], [], [], [] # 空であろうと必ずリスト型を保つ。
         if d["coverImageUrl"] is not None:
-            urldata[id]["cover"] += [d["coverImageUrl"]]
-        if d["body"] is not None: # d["body"]の中身が空の場合は何もしない。
-            if "files" in d["body"]:
-                urldata[id]["file"] += [u["url"] for u in d["body"]["files"] if "url" in u]
-            if "images" in d["body"]:
-                urldata[id]["image"] += [u["originalUrl"] for u in d["body"]["images"] if "originalUrl" in u]
-                urldata[id]["thumb"] += [u["thumbnailUrl"] for u in d["body"]["images"] if "thumbnailUrl" in u]
-            if "imageMap" in d["body"]:
-                urldata[id]["image"] += [u["originalUrl"] for u in d["body"]["imageMap"].values() if "originalUrl" in u]
-                urldata[id]["thumb"] += [u["thumbnailUrl"] for u in d["body"]["imageMap"].values() if "thumbnailUrl" in u]
-            # if "fileMap" in d["body"]:
-            # if "embedMap" in d["body"]:
-            # if "urlEmbedMap" in d["body"]:
-        return urldata
+            cover += [d["coverImageUrl"]]
+        if body is not None: # bodyの中身が空の場合は何もしない。
+            if "files" in body:
+                file = [u["url"] for u in body["files"] if "url" in u]
+            if "images" in body:
+                image = [u["originalUrl"] for u in body["images"] if "originalUrl" in u]
+                thumb = [u["thumbnailUrl"] for u in body["images"] if "thumbnailUrl" in u]
+            if "imageMap" in body:
+                image = [u["originalUrl"] for u in body["imageMap"].values() if "originalUrl" in u]
+                thumb = [u["thumbnailUrl"] for u in body["imageMap"].values() if "thumbnailUrl" in u]
+            # if "fileMap" in body:
+            # if "embedMap" in body:
+            # if "urlEmbedMap" in body:
+        return {"id":d["id"], "image":image, "cover":cover, "thumb":thumb, "file":file}
     
     def __extract_profile_url(self, data:list) -> dict[str, list[str]]:
         """
@@ -337,14 +322,15 @@ class File:
         }
         ```
         """
-        urldata = {"image":[], "cover":[], "thumb":[], "icon":[]} # 空であろうと必ずリスト型を保つ。
-        if data["body"]["user"]["iconUrl"] is not None:
-            urldata["icon"] += [data["body"]["user"]["iconUrl"]]
-        if data["body"]["coverImageUrl"] is not None:
-            urldata["cover"] += [data["body"]["coverImageUrl"]]
-        urldata["image"] = [u["imageUrl"] for u in data["body"]["profileItems"] if "imageUrl" in u]
-        urldata["thumb"] = [u["thumbnailUrl"] for u in data["body"]["profileItems"] if "thumbnailUrl" in u]
-        return urldata
+        image, cover, thumb, icon = [], [], [], [] # 空であろうと必ずリスト型を保つ。
+        body = data["body"]
+        if body["user"]["iconUrl"] is not None:
+            icon += [body["user"]["iconUrl"]]
+        if body["coverImageUrl"] is not None:
+            cover += [body["coverImageUrl"]]
+        image = [u["imageUrl"] for u in body["profileItems"] if "imageUrl" in u]
+        thumb = [u["thumbnailUrl"] for u in body["profileItems"] if "thumbnailUrl" in u]
+        return {"image":image, "cover":cover, "thumb":thumb, "icon":icon}
 
     def __get_urls_len(self, urls:dict[str, dict[str, list[str]]]) -> int:
         """URLをまとめた変数の中にある要素の数を数えます。"""
@@ -363,19 +349,24 @@ class File:
         """最新の投稿一覧のデータを読み込み、全ての添付ファイルや画像等をダウンロードします。"""
         postlist = self.get_postlist()
         ids = [d["id"] for d in postlist]
-        for i in range(len(ids)):
-            self.__log("投稿(%s)のダウンロードを開始(%d/%d件)" % (ids[i], i+1, len(ids)))
-            self.download_files(postid=ids[i])
+        for i, id in enumerate(ids):
+            self._log("投稿(%s)のダウンロードを開始(%d/%d件)" % (id, i+1, len(ids)))
+            self.download_files(postid=id)
 
     def download_files(self, postid:str) -> None:
         """投稿データから添付ファイルや画像等をダウンロードします。"""
         def __get_filetype_name(filetype:str) -> str:
             """filetypeから日本語の名前を返す"""
-            if filetype == "images": return "画像"
-            elif filetype == "cover": return "カバー画像"
-            elif filetype == "thumbnails": return "サムネイル画像"
-            elif filetype == "files": return "ファイル"
-            else: return "不明なファイル"
+            if   filetype == "images":
+                return "画像"
+            elif filetype == "cover":
+                return "カバー画像"
+            elif filetype == "thumbnails":
+                return "サムネイル画像"
+            elif filetype == "files":
+                return "ファイル"
+            else:
+                return "不明なファイル"
 
         def save(urls:list[str], postid:str, filetype:str) -> None:
             """画像をダウンロードして保存する"""
@@ -385,41 +376,40 @@ class File:
             for url in urls:
                 if (os.path.isfile(os.path.join(dir, os.path.basename(url)))
                         and not self.args.force_update):
-                    self.__log("%sのダウンロードをスキップ" % __get_filetype_name(filetype))
+                    self._log("%sのダウンロードをスキップ" % __get_filetype_name(filetype))
                     continue
-                self.__log("%sをダウンロード中..." % __get_filetype_name(filetype))
+                self._log("%sをダウンロード中..." % __get_filetype_name(filetype))
                 try:
                     r = self.session.get(url, timeout=(6.0, 12.0))
                 except requests.exceptions.Timeout:
-                    self.__log("接続がタイムアウトしました。")
-                    self.__log("　URL: " + url)
+                    self._log("接続がタイムアウトしました。"
+                               "　URL: " + url)
                     sleep(WAIT_TIME)
                     continue
                 except ConnectionError as e:
-                    self.__log("通信が切断されました。")
-                    self.__log("　URL: " + url)
-                    self.__log("　例外: " + e)
+                    self._log("通信が切断されました。"
+                               f"　URL: {url}"
+                               f"　例外: {e}")
                     sleep(WAIT_TIME)
                     continue
+                
                 try:
                     r.raise_for_status()
                 except requests.RequestException as e:
-                    self.__log("ファイルの取得に失敗しました。")
-                    self.__log("　ステータスコード: " + str(r.status_code))
+                    self._log("ファイルの取得に失敗しました。"
+                              f"　ステータスコード: {str(r.status_code)}")
                 with open(os.path.join(dir, os.path.basename(url)), mode="wb") as f:
                     f.write(r.content)
                 sleep(WAIT_TIME)
 
         postdata = self.get_postdata(postid=postid)
-        urls = self.__extract_file_url(data=postdata)
-        for postid, t in urls.items():
-            # for文である必要はないけれど、過去のソースの名残でこうなっている
-            if self.__get_urls_len(t) == 0: continue
-            os.makedirs(os.path.join(BASE_LOCAL_DIR, self.creator_id, postid), exist_ok=True)
-            save(t["image"], postid=postid, filetype="images")
-            save(t["cover"], postid=postid, filetype="cover")
-            save(t["thumb"], postid=postid, filetype="thumbnails")
-            save(t["file"], postid=postid, filetype="files")
+        t = self.__extract_file_url(data=postdata)
+        if self.__get_urls_len(t) == 0: return
+        os.makedirs(os.path.join(BASE_LOCAL_DIR, self.creator_id, postid), exist_ok=True)
+        save(t["image"], postid=t["id"], filetype="images")
+        save(t["cover"], postid=t["id"], filetype="cover")
+        save(t["thumb"], postid=t["id"], filetype="thumbnails")
+        save(t["file"], postid=t["id"], filetype="files")
     
 
     def download_files_on_profile(self, profiledata:dict) -> None:
@@ -433,27 +423,27 @@ class File:
                 count += 1
                 if (os.path.isfile(os.path.join(dir, os.path.basename(url)))
                         and not self.args.force_update):
-                    self.__log("プロフィール画像のダウンロードをスキップ(%d/%d件)" % (count, max_count))
+                    self._log("プロフィール画像のダウンロードをスキップ(%d/%d件)" % (count, max_count))
                     continue
-                self.__log("プロフィール画像をダウンロード中...(%d/%d件)" % (count, max_count))
+                self._log("プロフィール画像をダウンロード中...(%d/%d件)" % (count, max_count))
                 try:
                     r = self.session.get(url, timeout=(6.0, 12.0))
                 except requests.exceptions.Timeout:
-                    self.__log("接続がタイムアウトしました。")
-                    self.__log("　URL: " + url)
+                    self._log("接続がタイムアウトしました。"
+                              f"　URL: {url}" )
                     sleep(WAIT_TIME)
                     continue
                 except ConnectionError as e:
-                    self.__log("通信が切断されました。")
-                    self.__log("　URL: " + url)
-                    self.__log("　例外: " + e)
+                    self._log("通信が切断されました。"
+                              f"　URL: {url}"
+                              f"　例外: {e}")
                     sleep(WAIT_TIME)
                     continue
                 try:
                     r.raise_for_status()
                 except requests.RequestException as e:
-                    self.__log("ファイルの取得に失敗しました。")
-                    self.__log("　ステータスコード: " + str(r.status_code))
+                    self._log("ファイルの取得に失敗しました。")
+                    self._log("　ステータスコード: " + str(r.status_code))
                 with open(os.path.join(dir, os.path.basename(url)), mode="wb") as f:
                     f.write(r.content)
                 sleep(WAIT_TIME)

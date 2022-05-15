@@ -4,3 +4,4 @@ profile/
 __pycache__/
 .vscode/
 *.json
+*.ps1

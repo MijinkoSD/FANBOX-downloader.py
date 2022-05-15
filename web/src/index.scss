@@ -1,0 +1,59 @@
+$navbar-height: 50px;
+
+body{
+    // background-color: #333;
+    margin: $navbar-height 0 0;
+    // height: 2000px;
+    background-color: rgba($color: #000000, $alpha: 0.3);
+}
+header{
+    position: fixed;
+    top: 0;
+    display: block;
+    width: 100%;
+    height: $navbar-height;
+    background-color: rgba($color: #fff, $alpha: 0.2);
+}
+
+#app {
+    position: absolute;
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+.content {
+    display: flex;
+    margin: 20px 10px;
+    padding: 0;
+    width: auto;
+    height: auto;
+    flex:1;
+    background-color: aqua;
+    flex-direction: column;
+    
+    .thumbnail {
+        display: block;
+        width: 100%;
+        height: 300px;
+        overflow: hidden;
+
+        img {
+            min-width: 100%;
+            min-height: 100%;
+        }
+    }
+    .body-text {
+        margin: 0;
+        padding: 0 1.5em;
+    }
+}
+
+// テスト用
+#app-test{
+    h1 {
+        margin: 0 auto;
+    }
+}

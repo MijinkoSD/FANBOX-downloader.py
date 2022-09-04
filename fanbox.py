@@ -302,7 +302,8 @@ class File(Session):
             if "imageMap" in body:
                 image = [u["originalUrl"] for u in body["imageMap"].values() if "originalUrl" in u]
                 thumb = [u["thumbnailUrl"] for u in body["imageMap"].values() if "thumbnailUrl" in u]
-            # if "fileMap" in body:
+            if "fileMap" in body:
+                file = [u["url"] for u in body["fileMap"].values() if "url" in u]
             # if "embedMap" in body:
             # if "urlEmbedMap" in body:
         return {"id":d["id"], "image":image, "cover":cover, "thumb":thumb, "file":file}

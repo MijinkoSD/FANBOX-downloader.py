@@ -1,6 +1,13 @@
-test.py
-posts/
-profile/
-__pycache__/
-.vscode/
-*.json
+# data
+posts
+profile
+
+# cache
+__pycache__
+.mypy_cache
+
+# venv
+.venv
+
+# local files
+local_files

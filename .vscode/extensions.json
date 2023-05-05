@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "ms-python.python",
+        "donjayamanne.python-extension-pack",
+    ],
+    "unwantedRecommendations": [
+        "ms-python.autopep8",
+        "ms-python.flake8"
+    ]
+}

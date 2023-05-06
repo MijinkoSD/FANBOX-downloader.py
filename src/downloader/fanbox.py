@@ -142,7 +142,9 @@ class Post(Session):
             return {}
         return r.json()
 
-    def __search_latest_filename(self, path: str = BASE_LOCAL_DIR, pattern: str = "") -> str:
+    def __search_latest_filename(
+            self, path: str = BASE_LOCAL_DIR, pattern: str = ""
+    ) -> str:
         """
         指定したパターンに合致するファイルの中で一番新しいものを返します。
 

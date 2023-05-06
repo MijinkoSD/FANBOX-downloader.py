@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
-from ast import arg
 import sys
 import argparse
 
-import fanbox
+from src.downloader import fanbox
 
 module_description = '''
 吾輩はFANBOXダウンローダー。
@@ -12,7 +11,8 @@ module_description = '''
 
 # やけにオプション引数が多い（TODO代わり）
 parser = argparse.ArgumentParser(
-    description=module_description, formatter_class=argparse.RawDescriptionHelpFormatter)
+    description=module_description,
+    formatter_class=argparse.RawDescriptionHelpFormatter)
 parser.add_argument(
     "-s", "--session-id", type=str,
     help="FANBOXSESSID（FANBOXのセッションID）を設定します。有料プランの投稿をダウンロードするには必須です。")
@@ -51,14 +51,15 @@ else:
 
 for cid in args.creator_id:
     fanbox.print_with_timestamp("%sのダウンロードを開始します" % cid)
-    fb = fanbox.Post(creator_id=cid, args=args,
-                     FANBOXSESSID=sessid, log_to_stdout=True)
-    fb.download(page_limit=limit)
-    sessid = fb.sessid
+    fb_post = fanbox.Post(creator_id=cid, args=args,
+                          FANBOXSESSID=sessid, log_to_stdout=True)
+    fb_post.download(page_limit=limit)
+    sessid = fb_post.sessid
     if limit is int:
         if limit == 0:
             continue
-    fb = fanbox.File(creator_id=cid, args=args,
-                     FANBOXSESSID=sessid, log_to_stdout=True)
-    fb.download()
-    sessid = fb.sessid
+    del fb_post
+    fb_file = fanbox.File(creator_id=cid, args=args,
+                          FANBOXSESSID=sessid, log_to_stdout=True)
+    fb_file.download()
+    sessid = fb_file.sessid

@@ -3,6 +3,7 @@ import sys
 import argparse
 
 from src.downloader import fanbox
+from src.downloader.util import print_with_timestamp
 
 module_description = '''
 吾輩はFANBOXダウンローダー。
@@ -50,7 +51,7 @@ else:
     limit = args.page_limit if args.page_limit >= 0 else 0
 
 for cid in args.creator_id:
-    fanbox.print_with_timestamp("%sのダウンロードを開始します" % cid)
+    print_with_timestamp("%sのダウンロードを開始します" % cid)
     fb_post = fanbox.Post(creator_id=cid, args=args,
                           FANBOXSESSID=sessid, log_to_stdout=True)
     fb_post.download(page_limit=limit)

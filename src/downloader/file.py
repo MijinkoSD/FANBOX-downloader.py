@@ -63,7 +63,7 @@ class File(Session):
 
     def get_postlist(self) -> Any:
         """最新の投稿一覧のデータを読み込み、そのデータを返します。"""
-        pattern = "^" + re.escape(self.creator_id) + "_\d{14}\.json$"
+        pattern = "^" + re.escape(self.creator_id) + r"_\d{14}\.json$"
         filedir = os.path.join(BASE_LOCAL_DIR,
                                self.__search_latest_filename(pattern=pattern))
         with open(filedir, mode="rt", encoding="utf-8") as f:
@@ -233,7 +233,9 @@ class File(Session):
                 except requests.RequestException:
                     self._log("ファイルの取得に失敗しました。"
                               f"  ステータスコード: {str(r.status_code)}")
-                with open(os.path.join(dir, os.path.basename(url)), mode="wb") as f:
+                with open(
+                    os.path.join(dir, os.path.basename(url)), mode="wb"
+                ) as f:
                     f.write(r.content)
                 sleep(WAIT_TIME)
 

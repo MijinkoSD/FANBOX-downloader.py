@@ -121,7 +121,7 @@ class Post(Session):
             filepath = os.path.join(filedir, filename)
             try:
                 self.__search_latest_filename(
-                    path=filedir, pattern="^\d{14}\.json$")
+                    path=filedir, pattern=r"^\d{14}\.json$")
             except FileNotFoundError:
                 pass
             else:

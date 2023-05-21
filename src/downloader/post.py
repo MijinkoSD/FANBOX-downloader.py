@@ -1,6 +1,6 @@
 import os
 import re
-import urllib
+import urllib.parse as urlparse
 from typing import Any, Optional
 from time import sleep
 
@@ -52,7 +52,7 @@ class Post(Session):
 
     def __query_parse(self, url: str) -> dict[str, str]:
         """URLについているパラメータを返す"""
-        query = urllib.parse.parse_qs(urllib.parse.urlparse(url).query)
+        query = urlparse.parse_qs(urlparse.urlparse(url).query)
         result: dict[str, str] = {}
         for k in query:
             result[k] = query[k][0]

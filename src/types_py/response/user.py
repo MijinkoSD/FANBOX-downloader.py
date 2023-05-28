@@ -2,6 +2,8 @@ from typing import TypedDict
 
 
 class User(TypedDict):
-    iconUrl: str
+    """クリエイターの基本的な情報"""
+
+    iconUrl: str | None
     name: str
     userId: str

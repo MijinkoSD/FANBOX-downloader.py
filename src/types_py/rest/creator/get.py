@@ -1,18 +1,6 @@
-from typing import TypedDict
+from typing import TypeAlias
 
-from ...response.user import ProfileItem, User
+from ...response.creator import Creator
 
 
-class Get(TypedDict):
-    coverImageUrl: str
-    creatorId: str
-    description: str
-    hasAdultContent: bool
-    hasBoothShop: bool
-    isAcceptingRequest: bool
-    isFollowed: bool
-    isStopped: bool
-    isSupported: bool
-    profileItems: ProfileItem
-    profileLinks: list[str]
-    user: User
+Get: TypeAlias = Creator

@@ -1,7 +1,9 @@
-from typing import TypedDict, Literal
+from typing import TypedDict, Literal, Optional
 
 from .user import User
 from .post_link import PostLink
+from .post_body import PostBodyArticle, PostBodyImage, PostBodyFile, \
+    PostBodyText, PostBodyVideo
 
 
 class PostInfo(TypedDict):
@@ -42,17 +44,7 @@ class PostInfo(TypedDict):
     """投稿者のクリエイターID"""
     hasAdultContent: bool
     """R-18の投稿であればtrue。"""
-    # excerpt: str
-    """
-    投稿本文の最初の部分。
-    投稿の閲覧条件を満たしていない場合は空文字列が格納される。
-    """
-
-
-class PostInfoArticle(TypedDict):
-    type: Literal["article"]
-    coverImageUrl: str
-    body: None
+    coverImageUrl: Optional[str]
     excerpt: str
     """
     投稿本文の最初の部分。
@@ -62,3 +54,28 @@ class PostInfoArticle(TypedDict):
     nextPost: PostLink
     prevPost: PostLink
     imageForShare: str
+
+
+class PostInfoArticle(TypedDict):
+    type: Literal["article"]
+    body: PostBodyArticle
+
+
+class PostInfoImage(TypedDict):
+    type: Literal["image"]
+    body: PostBodyImage
+
+
+class PostInfoFile(TypedDict):
+    type: Literal["file"]
+    body: PostBodyFile
+
+
+class PostInfoText(TypedDict):
+    type: Literal["text"]
+    body: PostBodyText
+
+
+class PostInfoVideo(TypedDict):
+    type: Literal["video"]
+    body: PostBodyVideo

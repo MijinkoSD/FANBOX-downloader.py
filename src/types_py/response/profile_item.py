@@ -1,5 +1,6 @@
 from typing import TypedDict, Literal, TypeAlias
 
+from .video_service_provider import ServiceProvider
 
 ProfileItem: TypeAlias = "Image" | "Video"
 """プロフィール欄のポートフォリオ"""
@@ -23,8 +24,7 @@ class Video(TypedDict):
 
     id: str
     """ID。"""
-    serviceProvider: Literal[
-        "youtube" | "vimeo" | "soundcloud" | "pawoo_music"]
+    serviceProvider: ServiceProvider
     """動画や音声を提供しているサイトを表す文字列。"""
     videoId: str
     """提供サイトにおけるコンテンツID。"""

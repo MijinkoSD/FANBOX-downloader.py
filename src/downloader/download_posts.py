@@ -25,6 +25,7 @@ class DownloadPosts(Post):
         if page_limit is not None:
             if page_limit == 0:
                 return
+        self._log("投稿データを確認中...")
         paginate = self.paginate_creator()
         postlist: ListCreator = ListCreator({"items": [], "nextUrl": ""})
         for url in paginate:
@@ -48,11 +49,12 @@ class DownloadPosts(Post):
     #     payload = {"creatorId": self.creator_id}
     #     return self.__download_json(url, params=payload)
 
-    def get_listCreator(self, **kwargs: str) -> Any:
-        """post.listCreatorを叩いてページ一覧の情報を取得する。"""
-        url = BASE_URL+"post.listCreator"
-        payload = kwargs
-        return self.__download_json(url, params=payload)
+    # def get_listCreator(self, **kwargs: str) -> ListCreator:
+    #     """post.listCreatorを叩いてページ一覧の情報を取得する。"""
+    #     url = BASE_URL+"post.listCreator"
+    #     payload = kwargs
+    #     res: ListCreator = self.__download_json(url, params=payload)["body"]
+    #     return res
 
     def get_creator_get(self) -> Any:
         """creator.getを叩いてクリエイターのFANBOX上のプロフィールなどを取得する。"""
@@ -118,8 +120,8 @@ class DownloadPosts(Post):
             limit = len(paginate["body"])
         for i in range(limit):
             self._log("投稿データ一覧を取得中...(%d/%d件)" % (i+1, limit))
-            param = self.__query_parse(paginate["body"][i])
-            posts += self.get_listCreator(**param)["body"]["items"]
+            posts += self.list_creator_by_full_url(
+                paginate["body"][i])["items"]
             sleep(WAIT_TIME/3)
         return posts
 

@@ -16,7 +16,7 @@ class Post(Session):
         url = urljoin(BASE_URL, "post.paginateCreator")
         payload = {"creatorId": self.creator_id}
         json: PagenateCreator = self._download_json(
-            url, params=payload)
+            url, params=payload)["body"]
         return json
 
     def list_creator(self, payload: dict[str, str]) -> ListCreator:
@@ -30,7 +30,7 @@ class Post(Session):
         """
         url = urljoin(BASE_URL, "post.listCreator")
         json: ListCreator = self._download_json(
-            url, params=payload)
+            url, params=payload)["body"]
         return json
 
     def list_creator_by_full_url(self, paginate_url: str) -> ListCreator:
@@ -41,5 +41,5 @@ class Post(Session):
     def info(self, post_id: str) -> Info:
         url = urljoin(BASE_URL, "post.info")
         payload = {"postId": post_id}
-        json: Info = self._download_json(url, params=payload)
+        json: Info = self._download_json(url, params=payload)["body"]
         return json

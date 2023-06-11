@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# FIXME: _post依存をやめる
 from ._post import Post
 from .file import File
 

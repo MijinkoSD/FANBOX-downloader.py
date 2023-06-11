@@ -241,7 +241,7 @@ class File(Session):
 
         postdata = self.get_postdata(postid=postid)
         t = self.__extract_file_url(data=postdata)
-        # TODO: mypyがt周りでエラーを吐いてしまっているので後日解消する
+        # FIXME: mypyがt周りでエラーを吐いてしまっているので後日解消する
         if self.__get_urls_len(t) == 0:
             return
         os.makedirs(os.path.join(BASE_LOCAL_DIR,

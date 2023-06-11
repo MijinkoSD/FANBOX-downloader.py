@@ -3,7 +3,7 @@ from urllib.parse import parse_qs, urlparse
 
 import requests
 
-from .common import Headers
+from .common import HEADERS
 from .args import Args
 from ..util import print_with_timestamp
 
@@ -21,7 +21,7 @@ class Session:
             self.sessid = FANBOXSESSID
         else:
             self.sessid = ""
-        self.session.headers = Headers
+        self.session.headers = HEADERS
         self.is_print_log = log_to_stdout
 
     @property

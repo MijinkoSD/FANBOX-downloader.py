@@ -1,10 +1,9 @@
 from urllib.parse import urljoin
-from functools import singledispatchmethod
 
+from src.types_py.rest.post import PagenateCreator, ListCreator, Info
 from .common import BASE_URL
 from .session import Session
 from .args import Args
-from src.types_py.rest.post import PagenateCreator, ListCreator, Info
 
 
 class Post(Session):
@@ -20,7 +19,6 @@ class Post(Session):
             url, params=payload)
         return json
 
-    @singledispatchmethod
     def list_creator(self, payload: dict[str, str]) -> ListCreator:
         """目次用の簡易投稿データをダウンロードします。
 
@@ -35,8 +33,7 @@ class Post(Session):
             url, params=payload)
         return json
 
-    @list_creator.register
-    def _(self, paginate_url: str) -> ListCreator:
+    def list_creator_by_full_url(self, paginate_url: str) -> ListCreator:
         payload = self._parse_url_query(paginate_url)
         json = self.list_creator(payload=payload)
         return json

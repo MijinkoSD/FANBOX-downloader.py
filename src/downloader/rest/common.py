@@ -1,7 +1,8 @@
 from typing import Final
 
+
 BASE_URL: Final[str] = "https://api.fanbox.cc/"
-Headers: Final[dict[str, str]] = {
+HEADERS: Final[dict[str, str]] = {
     "accept": "application/json, text/plain, */*",
     "accept-encoding": "gzip, deflate, br",
     "accept-language": "ja,en-US;q=0.9,en;q=0.8",

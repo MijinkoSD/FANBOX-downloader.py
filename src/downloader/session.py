@@ -7,6 +7,11 @@ from .util import print_with_timestamp
 
 
 class Session:
+    """
+    廃止予定
+    移行先：.rest.session
+    """
+
     def __init__(self, creator_id: str,
                  args: argparse.Namespace = argparse.Namespace(),
                  FANBOXSESSID: str = "", log_to_stdout: bool = False):

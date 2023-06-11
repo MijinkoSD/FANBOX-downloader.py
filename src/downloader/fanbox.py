@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from .post import Post
+from ._post import Post
 from .file import File
 
 BASE_URL = "https://api.fanbox.cc/"

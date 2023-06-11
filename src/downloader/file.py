@@ -8,6 +8,7 @@ import requests
 
 from .fanbox import BASE_LOCAL_DIR, BASE_LOCAL_PROFILE_DIR, WAIT_TIME
 from .session import Session
+from .file_type import ExtractFileURLData
 
 
 class File(Session):
@@ -80,7 +81,7 @@ class File(Session):
         with open(filedir, mode="rt", encoding="utf-8") as f:
             return json.load(f)
 
-    def __extract_file_url(self, data: Any) -> dict[str, list[str] | str]:
+    def __extract_file_url(self, data: Any) -> ExtractFileURLData:
         """
         投稿データからダウンロード可能なURL（主に画像やファイルのもの）を返します。
 
@@ -91,7 +92,7 @@ class File(Session):
         -------
         ```json
         {
-            "id"   :[<post_id>],
+            "id"   :<post_id>,
             "image":[<URL>],
             "cover":[<URL>],
             "thumb":[<URL>],
@@ -242,7 +243,12 @@ class File(Session):
         postdata = self.get_postdata(postid=postid)
         t = self.__extract_file_url(data=postdata)
         # FIXME: mypyがt周りでエラーを吐いてしまっているので後日解消する
-        if self.__get_urls_len(t) == 0:
+        if self.__get_urls_len({
+                "image": t["image"],
+                "cover": t["cover"],
+                "thumb": t["thumb"],
+                "file": t["file"]
+        }) == 0:
             return
         os.makedirs(os.path.join(BASE_LOCAL_DIR,
                     self.creator_id, postid), exist_ok=True)

@@ -20,7 +20,7 @@ class Post(Session):
         return json
 
     def list_creator(self, payload: dict[str, str]) -> ListCreator:
-        """目次用の簡易投稿データをダウンロードします。
+        """目次用の簡易投稿データをダウンロードする。
 
         Args:
             payload (dict[str, str], optional): URLパラメータ。
@@ -34,11 +34,27 @@ class Post(Session):
         return json
 
     def list_creator_by_full_url(self, paginate_url: str) -> ListCreator:
+        """目次用の簡易投稿データをダウンロードする。ダウンロードするためのURL全体を要求する。
+
+        Args:
+            paginate_url (str): ダウンロード先のURL。
+
+        Returns:
+            ListCreator: 取得したデータ。
+        """
         payload = self._parse_url_query(paginate_url)
         json = self.list_creator(payload=payload)
         return json
 
     def info(self, post_id: str) -> Info:
+        """投稿データをダウンロードする。
+
+        Args:
+            post_id (str): 投稿データのID。
+
+        Returns:
+            Info: 取得した投稿データ。
+        """
         url = urljoin(BASE_URL, "post.info")
         payload = {"postId": post_id}
         json: Info = self._download_json(url, params=payload)["body"]

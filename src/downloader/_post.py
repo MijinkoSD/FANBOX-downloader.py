@@ -7,7 +7,8 @@ from time import sleep
 import requests
 
 from .fanbox import BASE_URL, BASE_LOCAL_DIR, BASE_LOCAL_PROFILE_DIR, WAIT_TIME
-from .util import time_now, save_json
+from .util import time_now
+from .file import save_json
 from .session import Session
 
 

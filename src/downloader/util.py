@@ -1,15 +1,5 @@
 #!/usr/bin/env python3
-import os
 import datetime
-import json
-from typing import Any
-
-
-def save_json(data: Any, dir: str) -> None:
-    """変数の中身をjsonファイルに保存します。"""
-    os.makedirs(os.path.dirname(dir), exist_ok=True)
-    with open(dir, mode="wt", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
 
 
 def time_now(utc_add: int = 9) -> int:

@@ -23,7 +23,7 @@ jobs:
         run: python -m mypy --strict --show-column-numbers ./
 
       - name: Do unit testing (unittest)
-        run: python -m unittest discover -s test -p test_*.py
+        run: python -m unittest discover -s src/test_py -p test_*.py
 
       - name: Do format checking (flake8)
         run: python -m flake8

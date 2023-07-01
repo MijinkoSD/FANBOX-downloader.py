@@ -11,6 +11,7 @@ class DownloadPosts(Creator, Post):
 
     def download(self, page_limit: Optional[int] = None) -> None:
         "投稿データのダウンロードから保存までを全部自動でやってくれるありがたい関数。"
+        # FIXME: 例外処理が足りない。
         # クリエイター情報の取得
         creator_profile = self.get_creator()
         save_creator_profile(creator_profile)
@@ -33,6 +34,7 @@ class DownloadPosts(Creator, Post):
             creator_id=self.creator_id
         )
 
+        # 投稿データの取得
         post_item_len = len(postlist["items"])
         for i, post_item in enumerate(postlist["items"]):
             post_id = post_item["id"]

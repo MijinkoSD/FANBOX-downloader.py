@@ -18,9 +18,9 @@ def save_creator_profile(profile: CreatorGet, date: int = time_now()) -> None:
         date (int): ファイル名に記入する保存日時。既定では現在日時になる。
     """
     CREATOR_ID: Final[str] = profile["creatorId"]
-    SAVE_FIlE_PATH: Final[str] = path.join(
+    SAVE_FILE_PATH: Final[str] = path.join(
         PROFILE_FILE_ROOT, CREATOR_ID, str(date) + ".json")
-    save_json(profile, SAVE_FIlE_PATH)
+    save_json(profile, SAVE_FILE_PATH)
 
 
 def save_postlist(

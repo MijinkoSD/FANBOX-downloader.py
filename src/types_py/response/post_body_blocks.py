@@ -1,8 +1,10 @@
 from typing import TypedDict, TypeAlias, Literal, Optional
 
 PostBodyBlocks: TypeAlias = "P" | "Header" | "Image" | "File" | "UrlEmbed"
+"""ブログタイプの投稿の本文データの型"""
 
 Style: TypeAlias = "StyleBold"
+"""文字装飾の名称（太字のみ確認されている）"""
 
 
 class P(TypedDict):
@@ -17,6 +19,7 @@ class Header(TypedDict):
     """見出し"""
     type: Literal["header"]
     text: str
+    """テキスト"""
 
 
 class StyleBold(TypedDict):

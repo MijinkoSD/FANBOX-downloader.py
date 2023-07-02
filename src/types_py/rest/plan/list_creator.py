@@ -4,6 +4,8 @@ from ...response.user import User
 
 
 class ListCreator(TypedDict):
+    """プランに関する型"""
+
     coverImageUrl: str
     """カバー画像。"""
     creatorId: str

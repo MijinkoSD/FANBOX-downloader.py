@@ -5,6 +5,8 @@ from .profile_item import ProfileItem
 
 
 class Creator(TypedDict):
+    """クリエイター情報。"""
+
     coverImageUrl: str
     """カバー画像。"""
     creatorId: str

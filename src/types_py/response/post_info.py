@@ -7,6 +7,8 @@ from .post_body import PostBodyArticle, PostBodyImage, PostBodyFile, \
 
 
 class PostInfo(TypedDict):
+    """投稿データの基盤型"""
+
     id: str
     """投稿のID。"""
     title: str
@@ -57,25 +59,30 @@ class PostInfo(TypedDict):
 
 
 class PostInfoArticle(TypedDict):
+    """ブログタイプの投稿にのみ含まれるデータの型"""
     type: Literal["article"]
     body: PostBodyArticle
 
 
 class PostInfoImage(TypedDict):
+    """画像タイプの投稿にのみ含まれるデータの型"""
     type: Literal["image"]
     body: PostBodyImage
 
 
 class PostInfoFile(TypedDict):
+    """ファイルタイプの投稿にのみ含まれるデータの型"""
     type: Literal["file"]
     body: PostBodyFile
 
 
 class PostInfoText(TypedDict):
+    """テキストタイプの投稿にのみ含まれるデータの型"""
     type: Literal["text"]
     body: PostBodyText
 
 
 class PostInfoVideo(TypedDict):
+    """動画・音声タイプの投稿にのみ含まれるデータの型"""
     type: Literal["video"]
     body: PostBodyVideo

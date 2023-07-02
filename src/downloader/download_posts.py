@@ -1,6 +1,8 @@
 from typing import Optional
+from time import sleep
 
 from src.types_py.rest.post import ListCreator
+from .common import WAIT_TIME_JSON
 from .file import save_creator_profile, save_postlist, save_postinfo, \
     is_exist_post
 from .rest import Post, Creator
@@ -29,6 +31,7 @@ class DownloadPosts(Creator, Post):
             _postlist = self.list_creator_by_full_url(url)
             postlist["items"].extend(_postlist["items"])
             postlist["nextUrl"] = _postlist["nextUrl"]
+            sleep(WAIT_TIME_JSON)
         save_postlist(
             items=postlist["items"],
             creator_id=self.creator_id
@@ -50,5 +53,6 @@ class DownloadPosts(Creator, Post):
             self._log("投稿データをダウンロード中...(%d/%d件)" % (i+1, post_item_len))
             post_info = self.info(post_id=post_id)
             save_postinfo(postinfo=post_info)
+            sleep(WAIT_TIME_JSON)
 
         # TODO: 動作チェック

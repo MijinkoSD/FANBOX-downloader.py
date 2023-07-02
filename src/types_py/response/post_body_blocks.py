@@ -1,6 +1,6 @@
-from typing import TypedDict, TypeAlias, Literal, Optional
+from typing import TypedDict, TypeAlias, Literal, Optional, Union
 
-PostBodyBlocks: TypeAlias = "P" | "Header" | "Image" | "File" | "UrlEmbed"
+PostBodyBlocks: TypeAlias = Union["P", "Header", "Image", "File", "UrlEmbed"]
 """ブログタイプの投稿の本文データの型"""
 
 Style: TypeAlias = "StyleBold"

@@ -1,8 +1,8 @@
-from typing import TypedDict, Literal, TypeAlias
+from typing import TypedDict, Literal, TypeAlias, Union
 
 from .video_service_provider import ServiceProvider
 
-ProfileItem: TypeAlias = "Image" | "Video"
+ProfileItem: TypeAlias = Union["Image", "Video"]
 """プロフィール欄のポートフォリオ"""
 
 

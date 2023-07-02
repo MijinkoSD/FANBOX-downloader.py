@@ -1,11 +1,14 @@
-from typing import TypeAlias
+from typing import TypeAlias, Union
 
 from ...response.post_info import PostInfo, PostInfoArticle, \
     PostInfoImage, PostInfoFile, PostInfoText, PostInfoVideo
 
-Info: TypeAlias = (
-    "_InfoArticle" | "_InfoImage" | "_InfoFile"
-    | "_InfoText" | "_InfoVideo")
+Info: TypeAlias = Union[
+    "_InfoArticle",
+    "_InfoImage",
+    "_InfoFile",
+    "_InfoText",
+    "_InfoVideo"]
 """投稿データに関する型"""
 
 

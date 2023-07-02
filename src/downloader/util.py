@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 import datetime
+from os.path import basename
+from urllib.parse import urlparse
 
 
 def time_now(utc_add: int = 9) -> int:
@@ -19,3 +21,12 @@ def print_with_timestamp(value: str, utc_add: int = 9) -> None:
         # 2行目以降は日付ではなく空白を入れる
         text = [text[0], *[' '*22 + t for t in text[1:]]]
     print(timestamp+"\n".join(text))
+
+
+def urlparse_filename(url: str) -> str:
+    """URL文字列からファイル名を取得します。
+
+    Args:
+        url (string): URL文字列
+    """
+    return basename(urlparse(url).path)

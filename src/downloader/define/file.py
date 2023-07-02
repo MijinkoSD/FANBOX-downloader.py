@@ -5,34 +5,20 @@ ProfileSubDir: TypeAlias = Literal["icon", "cover", "thumbnails", "images"]
 PostSubDir: TypeAlias = Literal["cover", "thumbnails", "images", "files"]
 """post内のサブディレクトリ名"""
 
-PROFILE_SUB_DIR_NAMES: list["_ProfileName"] = [{
-    "type": "icon",
-    "name": "ユーザーアイコン画像",
-}, {
-    "type": "cover",
-    "name": "カバー画像",
-}, {
-    "type": "thumbnails",
-    "name": "ポートフォリオのサムネイル画像",
-}, {
-    "type": "images",
-    "name": "ポートフォリオの元画像",
-}]
+PROFILE_SUB_DIR_NAMES: dict[ProfileSubDir, str] = {
+    "icon": "ユーザーアイコン画像",
+    "cover": "カバー画像",
+    "thumbnails": "ポートフォリオのサムネイル画像",
+    "images": "ポートフォリオの元画像",
+}
 """profile内のサブディレクトリの日本語名"""
 
-POST_SUB_DIR_NAMES: list["_PostName"] = [{
-    "type": "cover",
-    "name": "カバー画像",
-}, {
-    "type": "thumbnails",
-    "name": "サムネイル画像",
-}, {
-    "type": "images",
-    "name": "元画像",
-}, {
-    "type": "files",
-    "name": "ファイル",
-}]
+POST_SUB_DIR_NAMES: dict[PostSubDir, str] = {
+    "cover": "カバー画像",
+    "thumbnails": "サムネイル画像",
+    "images": "元画像",
+    "files": "ファイル",
+}
 """post内のサブディレクトリの日本語名"""
 
 

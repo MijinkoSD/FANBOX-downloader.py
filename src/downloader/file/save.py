@@ -1,5 +1,5 @@
 from os import path
-from typing import Final
+from typing import Final, Any
 
 from src.types_py.rest.creator import Get as CreatorGet
 from src.types_py.rest.post import Info
@@ -52,3 +52,39 @@ def save_postinfo(postinfo: Info, date: int = time_now()) -> None:
     SAVE_FILE_PATH: Final[str] = path.join(
         POST_FILE_ROOT, CREATOR_ID, POST_ID, "post", str(date) + ".json")
     save_json(postinfo, SAVE_FILE_PATH)
+
+
+def save_file_by_profile(
+    data: Any, creator_id: str, file_type: str, file_name: str
+) -> None:
+    """プロフィールのファイルを保存します。
+    保存先：`profiles/<クリエイターID>/<ファイル種別>/<ファイル名>`
+
+    Args:
+        data (Any): 保存するデータ。
+        creator_id (str): クリエイターID。
+        file_type (str): ファイル種別。
+        file_name (str): ファイル名。
+    """
+    FILE_PATH: Final[str] = path.join(
+        PROFILE_FILE_ROOT, creator_id, file_type, file_name)
+    with open(FILE_PATH, mode="bw") as f:
+        f.write(data)
+
+
+def save_file_by_post(
+    data: Any, creator_id: str, post_id: str, file_type: str, file_name: str
+) -> None:
+    """投稿データのファイルを保存します。
+    保存先：`post/<クリエイターID>/<投稿ID>/<ファイル種別>/<ファイル名>`
+
+    Args:
+        data (Any): 保存するデータ。
+        creator_id (str): クリエイターID。
+        file_type (str): ファイル種別。
+        file_name (str): ファイル名。
+    """
+    FILE_PATH: Final[str] = path.join(
+        POST_FILE_ROOT, creator_id, post_id, file_type, file_name)
+    with open(FILE_PATH, mode="bw") as f:
+        f.write(data)

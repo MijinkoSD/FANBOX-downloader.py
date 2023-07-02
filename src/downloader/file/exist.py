@@ -1,7 +1,7 @@
 from os import path, scandir
 from typing import Final
 
-from .common import POST_FILE_ROOT
+from .common import POST_FILE_ROOT, PROFILE_FILE_ROOT
 
 
 def is_exist_post(creator_id: str, post_id: str) -> bool:
@@ -26,3 +26,39 @@ def is_exist_post(creator_id: str, post_id: str) -> bool:
                 return True
     # 何も見つからずに終わった場合
     return False
+
+
+def is_exist_profile_file(
+    creator_id: str, file_type: str, file_name: str
+) -> bool:
+    """プロフィールのファイルが既に保存されているかを確認します。
+
+    Args:
+        creator_id (str): クリエイターID。
+        file_type (str): ファイル種別。
+        file_name (str): ファイル名。
+
+    Returns:
+        bool: 存在していればTrue。
+    """
+    SEARCH_DIR: Final[str] = path.join(
+        PROFILE_FILE_ROOT, creator_id, file_type, file_name)
+    return path.isfile(SEARCH_DIR)
+
+
+def is_exist_post_file(
+    creator_id: str, post_id: str, file_type: str, file_name: str
+) -> bool:
+    """投稿データのファイルが既に保存されているかを確認します。
+
+    Args:
+        creator_id (str): クリエイターID。
+        file_type (str): ファイル種別。
+        file_name (str): ファイル名。
+
+    Returns:
+        bool: 存在していればTrue。
+    """
+    SEARCH_DIR: Final[str] = path.join(
+        POST_FILE_ROOT, creator_id, post_id, file_type, file_name)
+    return path.isfile(SEARCH_DIR)

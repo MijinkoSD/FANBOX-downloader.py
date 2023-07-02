@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 import sys
 import argparse
+from typing import Type
 
-from src.downloader import fanbox
+from src.downloader import DownloadPosts, DownloadFiles, convert_to_args
 from src.downloader.util import print_with_timestamp
 
 module_description = '''
@@ -39,28 +40,28 @@ parser.add_argument("creator_id", nargs="+", type=str, help="投稿者のID")
 if len(sys.argv) <= 1:
     parser.print_help()
     exit()
-args = parser.parse_args()
+args = convert_to_args(parser.parse_args())
 
-if args.session_id is None:
+if args["session_id"] is None:
     sessid = ""
 else:
-    sessid = args.session_id
-if args.page_limit is None:
+    sessid = args["session_id"]
+if args["page_limit"] is None:
     limit = None
 else:
-    limit = args.page_limit if args.page_limit >= 0 else 0
+    limit = args["page_limit"] if args["page_limit"] >= 0 else 0
 
-for cid in args.creator_id:
+for cid in args["creator_id"]:
     print_with_timestamp("%sのダウンロードを開始します" % cid)
-    fb_post = fanbox.Post(creator_id=cid, args=args,
-                          FANBOXSESSID=sessid, log_to_stdout=True)
+    fb_post = DownloadPosts(creator_id=cid, args=args,
+                            FANBOXSESSID=sessid, log_to_stdout=True)
     fb_post.download(page_limit=limit)
     sessid = fb_post.sessid
-    if limit is int:
+    if limit is Type[int]:
         if limit == 0:
             continue
     del fb_post
-    fb_file = fanbox.File(creator_id=cid, args=args,
-                          FANBOXSESSID=sessid, log_to_stdout=True)
+    fb_file = DownloadFiles(creator_id=cid, args=args,
+                            FANBOXSESSID=sessid, log_to_stdout=True)
     fb_file.download()
     sessid = fb_file.sessid

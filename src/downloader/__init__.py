@@ -1,13 +1,9 @@
-from src.downloader import fanbox
+from .download_posts import DownloadPosts
+from .download_files import DownloadFiles
+from .rest import convert_to_args
 
 __all__ = [
-    "fanbox"
+    "DownloadPosts",
+    "DownloadFiles",
+    "convert_to_args"
 ]
-
-# from src.downloader.fanbox import Session, Post, File
-
-# __all__ = [
-#     "Session",
-#     "Post",
-#     "File",
-# ]

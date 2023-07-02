@@ -3,13 +3,9 @@ from urllib.parse import urljoin
 from src.types_py.rest.post import PagenateCreator, ListCreator, Info
 from .common import BASE_URL
 from .session import Session
-from .args import Args
 
 
 class Post(Session):
-    def __init__(self, args: Args, creator_id: str) -> None:
-        super().__init__(args=args, creator_id=creator_id)
-
     def paginate_creator(self) -> PagenateCreator:
         """post.paginateCreatorを叩いて全ページのURLを取得する。"""
         # self._log("投稿データを確認中...")

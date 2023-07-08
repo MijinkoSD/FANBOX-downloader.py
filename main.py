@@ -52,7 +52,7 @@ else:
     limit = args["page_limit"] if args["page_limit"] >= 0 else 0
 
 for cid in args["creator_id"]:
-    print_with_timestamp("%sのダウンロードを開始します" % cid)
+    print_with_timestamp("%sのダウンロードを開始します。" % cid)
     fb_post = DownloadPosts(creator_id=cid, args=args,
                             FANBOXSESSID=sessid, log_to_stdout=True)
     fb_post.download(page_limit=limit)

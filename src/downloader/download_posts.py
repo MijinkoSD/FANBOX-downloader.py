@@ -13,6 +13,7 @@ class DownloadPosts(Creator, Post):
 
     def download(self, page_limit: Optional[int] = None) -> None:
         "投稿データのダウンロードから保存までを全部自動でやってくれるありがたい関数。"
+        # TODO: ダウンロード件数を集計して
         # クリエイター情報の取得
         creator_profile = self.get_creator()
         save_creator_profile(creator_profile)

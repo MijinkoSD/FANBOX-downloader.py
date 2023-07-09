@@ -12,7 +12,7 @@ def read_creator_profile(
     creator_id: str, date: Optional[int] = None
 ) -> CreatorGet:
     """保存済みのクリエイター情報を取得します。
-    取得先：`profiles/<クリエイターID>/<日付>.json`
+    取得先：`profiles/<クリエイターID>/info/<日付>.json`
     なお、取得するデータの型チェックは行わない。
 
     Args:
@@ -31,7 +31,7 @@ def read_creator_profile(
                          % (creator_id))
 
     CREATOR_DIR: Final[str] = path.join(
-        PROFILE_FILE_ROOT, creator_id)
+        PROFILE_FILE_ROOT, creator_id, "info")
     file_name: str
     if date is None:
         file_name = get_latest_filename(CREATOR_DIR, r"\d{14}\.json")

@@ -47,7 +47,7 @@ def save_postinfo(postinfo: Info, date: int = time_now()) -> None:
         postinfo (Info): 保存する投稿データ。
         date (int, optional): ファイル名に記入する保存日時。既定では現在日時になる。
     """
-    CREATOR_ID: Final[str] = postinfo["user"]["userId"]
+    CREATOR_ID: Final[str] = postinfo["creatorId"]
     POST_ID: Final[str] = postinfo["id"]
     SAVE_FILE_PATH: Final[str] = path.join(
         POST_FILE_ROOT, CREATOR_ID, POST_ID, "post", str(date) + ".json")

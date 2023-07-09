@@ -11,7 +11,7 @@ from .util import save_json
 
 def save_creator_profile(profile: CreatorGet, date: int = time_now()) -> None:
     """クリエイター情報を保存します。
-    保存先：`profiles/<クリエイターID>/<日付>.json`
+    保存先：`profiles/<クリエイターID>/info/<日付>.json`
 
     Args:
         profile (CreatorGet): 保存するクリエイター情報。
@@ -19,7 +19,7 @@ def save_creator_profile(profile: CreatorGet, date: int = time_now()) -> None:
     """
     CREATOR_ID: Final[str] = profile["creatorId"]
     SAVE_FILE_PATH: Final[str] = path.join(
-        PROFILE_FILE_ROOT, CREATOR_ID, str(date) + ".json")
+        PROFILE_FILE_ROOT, CREATOR_ID, "info", str(date) + ".json")
     save_json(profile, SAVE_FILE_PATH)
 
 

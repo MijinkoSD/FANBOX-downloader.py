@@ -57,5 +57,3 @@ class DownloadPosts(Creator, Post):
             post_info = self.info(post_id=post_id)
             save_postinfo(postinfo=post_info)
             sleep(WAIT_TIME_JSON)
-
-        # TODO: 動作チェック

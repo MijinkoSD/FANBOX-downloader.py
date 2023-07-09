@@ -68,12 +68,12 @@ class DownloadFiles(Session):
             # ログ出力
             if not self.args["force_update"] and is_exist:
                 self._log("(%d/%d)プロフィールの%sのダウンロードをスキップ"
-                          % (i,
+                          % (i+1,
                               len(profile_urls),
                               PROFILE_SUB_DIR_NAMES[file_type]))
             else:
                 self._log("(%d/%d)プロフィールの%sをダウンロード中..."
-                          % (i,
+                          % (i+1,
                               len(profile_urls),
                               PROFILE_SUB_DIR_NAMES[file_type]))
 
@@ -161,14 +161,14 @@ class DownloadFiles(Session):
                 # ログ出力
                 if not self.args["force_update"] and is_exist:
                     self._log("  (%d/%d)投稿の%sのダウンロードをスキップ"
-                              % (i,
+                              % (i+1,
                                  len(post_urls),
                                  POST_SUB_DIR_NAMES[file_type]))
                     stats["skip"] += 1
                     continue
                 else:
                     self._log("  (%d/%d)投稿の%sをダウンロード中..."
-                              % (i,
+                              % (i+1,
                                  len(post_urls),
                                  POST_SUB_DIR_NAMES[file_type]))
 
@@ -220,5 +220,3 @@ class DownloadFiles(Session):
                 sleep(WAIT_TIME_FILE)
 
         return stats
-
-    # TODO: file_.pyを再構築する。ファイル・画像の類をダウンロードできるようにする。

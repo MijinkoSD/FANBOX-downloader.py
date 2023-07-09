@@ -11,5 +11,5 @@ class Creator(Session):
         self._log("プロフィール情報をダウンロード中...")
         url = urljoin(BASE_URL, "creator.get")
         payload = {"creatorId": self.creator_id}
-        json: Get = self._download_json(url, params=payload)
+        json: Get = self._download_json(url, params=payload)["body"]
         return json

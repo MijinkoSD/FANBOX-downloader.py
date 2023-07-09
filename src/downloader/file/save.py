@@ -1,4 +1,4 @@
-from os import path
+from os import path, makedirs
 from typing import Final, Any
 
 from src.types_py.rest.creator import Get as CreatorGet
@@ -66,8 +66,11 @@ def save_file_by_profile(
         file_type (str): ファイル種別。
         file_name (str): ファイル名。
     """
-    FILE_PATH: Final[str] = path.join(
-        PROFILE_FILE_ROOT, creator_id, file_type, file_name)
+    FILE_DIR: Final[str] = path.join(
+        PROFILE_FILE_ROOT, creator_id, file_type)
+    FILE_PATH: Final[str] = path.join(FILE_DIR, file_name)
+
+    makedirs(FILE_DIR, exist_ok=True)
     with open(FILE_PATH, mode="bw") as f:
         f.write(data)
 
@@ -84,7 +87,10 @@ def save_file_by_post(
         file_type (str): ファイル種別。
         file_name (str): ファイル名。
     """
-    FILE_PATH: Final[str] = path.join(
-        POST_FILE_ROOT, creator_id, post_id, file_type, file_name)
+    FILE_DIR: Final[str] = path.join(
+        POST_FILE_ROOT, creator_id, post_id, file_type)
+    FILE_PATH: Final[str] = path.join(FILE_DIR, file_name)
+
+    makedirs(FILE_DIR, exist_ok=True)
     with open(FILE_PATH, mode="bw") as f:
         f.write(data)

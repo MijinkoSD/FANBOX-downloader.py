@@ -137,7 +137,7 @@ class DownloadFiles(Session):
         post_ids: list[str] = extract_post_id(self.creator_id)
         for i, post_id in enumerate(post_ids):
             self._log("(%d/%d)投稿データ(%s)を読み込み中" % (
-                i, len(post_ids), post_id))
+                i+1, len(post_ids), post_id))
 
             try:
                 post_urls = extract_url_from_post(

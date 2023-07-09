@@ -45,7 +45,7 @@ def get_latest_filename(
     Examples:
         最新の日付が入ったファイル名を取得する場合。
         patternには数字8桁(YYYYMMDD)がファイル名のjsonファイルを絞り込むように設定する。
-        >>> get_latest_filename(dir=".", pattern=r"\d{8}.json")
+        >>> get_latest_filename(dir=".", pattern=r"\d{14}.json")
     """
     _pattern = re.compile(pattern)
     files: list[str] = []

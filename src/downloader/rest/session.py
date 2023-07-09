@@ -9,6 +9,7 @@ from ..util import print_with_timestamp
 
 
 class Session:
+    # TODO: ここでcreator_idを渡すのをやめて、DownloadPostsなどで渡すようにする
     def __init__(self,
                  args: Args,
                  creator_id: str,

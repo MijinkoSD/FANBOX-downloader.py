@@ -34,7 +34,7 @@ def read_creator_profile(
         PROFILE_FILE_ROOT, creator_id)
     file_name: str
     if date is None:
-        file_name = get_latest_filename(CREATOR_DIR, r"\d{8}\.json")
+        file_name = get_latest_filename(CREATOR_DIR, r"\d{14}\.json")
     else:
         file_name = str(date) + ".json"
     READ_FILE_PATH: Final[str] = path.join(
@@ -71,7 +71,7 @@ def read_postlist(
         POST_FILE_ROOT, creator_id, "postlist")
     file_name: str
     if date is None:
-        file_name = get_latest_filename(POSTLIST_DIR, r"\d{8}\.json")
+        file_name = get_latest_filename(POSTLIST_DIR, r"\d{14}\.json")
     else:
         file_name = str(date) + ".json"
     READ_FILE_PATH: Final[str] = path.join(
@@ -112,7 +112,7 @@ def read_postinfo(
         POST_FILE_ROOT, creator_id, post_id, "post")
     file_name: str
     if date is None:
-        file_name = get_latest_filename(POST_DIR, r"\d{8}\.json")
+        file_name = get_latest_filename(POST_DIR, r"\d{14}\.json")
     else:
         file_name = str(date) + ".json"
     READ_FILE_PATH: Final[str] = path.join(

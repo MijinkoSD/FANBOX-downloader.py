@@ -32,6 +32,9 @@ class DownloadPosts(Creator, Post):
             postlist["items"].extend(_postlist["items"])
             postlist["nextUrl"] = _postlist["nextUrl"]
             sleep(WAIT_TIME_JSON)
+            if i+1 >= page_limit:
+                # 予め指定された取得上限を突破した場合は中断する。
+                break
         save_postlist(
             items=postlist["items"],
             creator_id=self.creator_id

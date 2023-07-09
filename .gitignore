@@ -1,6 +1,6 @@
 # data
 posts
-profile
+profiles
 
 # cache
 __pycache__
@@ -11,3 +11,4 @@ __pycache__
 
 # local files
 local_files
+main_local.py

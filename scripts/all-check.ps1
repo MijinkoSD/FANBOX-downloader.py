@@ -22,7 +22,7 @@ Write-Host "-----------------------" -ForegroundColor Blue
 Write-Host "-----------------------" -ForegroundColor Blue
 Write-Host "venvを終了します。" -ForegroundColor Blue
 Write-Host "-----------------------" -ForegroundColor Blue
-deactivate
+. (Join-Path -Path $PSScriptRoot -ChildPath "/deactive-venv.ps1")
 
 Write-Host "-----------------------" -ForegroundColor Blue
 Write-Host "終了しました。" -ForegroundColor Green

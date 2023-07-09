@@ -87,6 +87,10 @@ def extract_url_from_post(
             "url": cover_url
         })
 
+    if POST["isRestricted"] or "body" not in POST:
+        # 閲覧権限のない支援者向け投稿は取得しようとしない
+        return urls
+
     if POST["type"] == "article":
         # ブログタイプの投稿
         # 画像
